@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+	xmlns:form="http://form" xmlns:field="http://field">
+<head>
+<meta charset="ISO-8859-1">
+<title>Movie Recommendation System</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+<script type="text/javascript"
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<style type="text/css">
+h1 {
+	text-align: center;
+}
+
+.navcolor {
+	background-color: #513CA3;
+}
+
+.row-centered {
+	text-align: center;
+}
+
+.block-with-text {
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+}
+</style>
+</head>
+<body class="body">
+	<nav class="navbar navbar-expand-md navcolor navbar-dark sticky-top">
+		<a class="navbar-brand" href="#">Movie Rockers</a>
+		<button class="navbar-toggler navbar-toggler-right" type="button"
+			data-toggle="collapse" data-target="#navb" aria-expanded="true">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div id="navb" class="navbar-collapse collapse hide">
+			<ul class="nav navbar-nav ml-auto">
+				<li class="nav-item"><a class="nav-link" href="#"><span
+						class="fas fa-user"></span> Sign Up</a></li>
+				<li class="nav-item"><a class="nav-link" href="#"><span
+						class="fas fa-sign-in-alt"></span> Login</a></li>
+			</ul>
+		</div>
+	</nav>
+	<br />
+	<br />
+	<div class="container">
+		<div class="row">
+			<div class="col-md-2"></div>
+			<div class="col-md-8">
+				<form action="/nothing">
+					<div class="form-group row">
+						<div class="col-md-10">
+							<input class="form-control" id="ex3" type="text"
+								placeholder="type here" name="search">
+						</div>
+						<div class="input-group-btn">
+							<button class="btn btn-primary mb-2" type="submit">search</button>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="col-md-2"></div>
+		</div>
+		<br />
+		<div class="row">
+			<h5 th:text="${count}"></h5>
+			&nbsp
+			<h5>movies found</h5>
+		</div>
+		<br />
+		<div class="row">
+			<div class="col-md-3" th:each="movie : ${movieMap}">
+				<div class="card border-dark mb-4" style="max-width: 18rem;">
+					<div class="card-header bgcol">
+						<p th:text="${movie.key.getName()}" />
+					</div>
+					<div class="card-body text-dark">
+						<p class="card-text wrap-text block-with-text"
+							th:text="${movie.value}" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<br />
+</body>
+</html>
