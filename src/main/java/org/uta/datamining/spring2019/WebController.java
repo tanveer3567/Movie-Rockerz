@@ -17,7 +17,7 @@ public class WebController {
 //		LinkedHashMap<CustomMap, String> result = SearchAlgorithm.search(search);
 		ModelAndView movies = new ModelAndView("result");
 //		movies.addObject("count", result.size());
-		movies.addObject("movieMap",null);
+//		movies.addObject("movieMap",result);
 		return movies;
 	}
 }
