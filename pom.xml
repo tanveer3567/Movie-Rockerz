@@ -10,10 +10,10 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.uta.datamining.spring2019</groupId>
-	<artifactId>datamining</artifactId>
+	<artifactId>movie-rockerz</artifactId>
 	<version>1.0</version>
 	<packaging>war</packaging>
-	<name>demo</name>
+	<name>movie-rockerz</name>
 	<description>Datamining project</description>
 
 	<properties>
@@ -90,6 +90,22 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+              <groupId>com.heroku.sdk</groupId>
+              <artifactId>heroku-maven-plugin</artifactId>
+              <version>2.0.3</version>
+              <configuration>
+                  <appName>movie-rockerz</appName>
+                  <includeTarget>false</includeTarget>
+                  <includes>
+                      <include>${project.build.directory}/${project.build.finalName}.jar</include>
+                  </includes>
+                  <jdkVersion>${java.version}</jdkVersion>
+                  <processTypes>
+                      <web>java $JAVA_OPTS -jar ${project.build.directory}/${project.build.finalName}.jar</web>
+                  </processTypes>
+              </configuration>
+          </plugin>
 		</plugins>
 	</build>
 
