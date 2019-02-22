@@ -96,13 +96,9 @@
               <version>2.0.3</version>
               <configuration>
                   <appName>movie-rockerz</appName>
-                  <includeTarget>false</includeTarget>
-                  <includes>
-                      <include>${project.build.directory}/${project.build.finalName}.jar</include>
-                  </includes>
                   <jdkVersion>${java.version}</jdkVersion>
                   <processTypes>
-                      <web>java $JAVA_OPTS -jar ${project.build.directory}/${project.build.finalName}.jar</web>
+                      <web>java $JAVA_OPTS -cp target/classes:target/dependency/* Main</web>
                   </processTypes>
               </configuration>
           </plugin>
