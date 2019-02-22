@@ -61,7 +61,7 @@ public class SearchAlgorithm {
 
 	public static void preLoad() throws FileNotFoundException {
 
-		String moviesDataSet = "C:\\Users\\Tanveer\\Downloads\\tmdb-5000-movie-dataset\\tmdb_5000_movies.csv";
+		String moviesDataSet = "src/tmdb_5000_movies.csv";
 		try {
 			FileReader filereader = new FileReader(new File(moviesDataSet));
 			CSVReader csvReader = new CSVReader(filereader);
