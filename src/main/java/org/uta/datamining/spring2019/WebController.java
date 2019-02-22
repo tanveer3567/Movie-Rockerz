@@ -14,10 +14,10 @@ public class WebController {
 	@GetMapping("/nothing")
 	public ModelAndView getNothing(@RequestParam(name = "search", required = true) String search)
 			throws FileNotFoundException {
-//		LinkedHashMap<CustomMap, String> result = SearchAlgorithm.search(search);
+		LinkedHashMap<CustomMap, String> result = SearchAlgorithm.search(search);
 		ModelAndView movies = new ModelAndView("result");
-//		movies.addObject("count", result.size());
-//		movies.addObject("movieMap",result);
+		movies.addObject("count", result.size());
+		movies.addObject("movieMap",result);
 		return movies;
 	}
 }

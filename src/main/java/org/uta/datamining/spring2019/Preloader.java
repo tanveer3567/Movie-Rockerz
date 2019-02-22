@@ -11,7 +11,7 @@ public class Preloader {
 
 	@PostConstruct
     private void init() throws FileNotFoundException {
-		//SearchAlgorithm.preLoad();
+		SearchAlgorithm.preLoad();
     }
 }
 
