@@ -8,10 +8,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class Preloader {
+	
+	public Runnable r = () -> {
+		try {
+			SearchAlgorithm.preLoad();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	};
 
 	@PostConstruct
-    private void init() throws FileNotFoundException {
-		SearchAlgorithm.preLoad();
+    private void init() { 
+		Thread t = new Thread(r);
+		t.start();
     }
 }
 
