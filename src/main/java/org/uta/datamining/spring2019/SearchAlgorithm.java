@@ -30,7 +30,7 @@ public class SearchAlgorithm {
 	static LinkedHashMap<Integer, ArrayList<String>> documentMap = new LinkedHashMap<Integer, ArrayList<String>>();
 	static LinkedHashSet<String> hashSet = new LinkedHashSet<String>();
 	static ArrayList<Double> finalVectorList = null;
-	static LinkedHashMap<Integer, List<Integer>> documentPrimaryVectorMap = new LinkedHashMap<Integer, List<Integer>>();
+	static LinkedHashMap<Integer, int[]> documentPrimaryVectorMap = new LinkedHashMap<Integer, int[]>();
 	static LinkedHashMap<Integer, ArrayList<Double>> documentFinalVectorMap = new LinkedHashMap<Integer, ArrayList<Double>>();
 	static PrintWriter printWriter = null;
 	static LinkedHashMap<String, Integer> documentFrquencyMapOfTerms = new LinkedHashMap<String, Integer>();
@@ -263,7 +263,7 @@ public class SearchAlgorithm {
 			for(int i=0; i<wordList.size(); i++) {
 				vectors[uniqueTermList.indexOf(wordList.get(i))]++;
 			}
-			documentPrimaryVectorMap.put(document.getKey(), Arrays.stream(vectors).boxed().collect(Collectors.toList()));
+			documentPrimaryVectorMap.put(document.getKey(), vectors);
 		}
 		
 		
@@ -271,12 +271,12 @@ public class SearchAlgorithm {
 
 	public static void createFinalDocumentVectors() {
 
-		for (Entry<Integer, List<Integer>> entry : documentPrimaryVectorMap.entrySet()) {
+		for (Entry<Integer, int[]> entry : documentPrimaryVectorMap.entrySet()) {
 			finalVectorList = new ArrayList<Double>(Collections.nCopies(hashSet.size(), new Double(0)));
-			List<Integer> tempList = entry.getValue();
-			for (int i = 0; i < tempList.size(); i++) {
-				if (tempList.get(i) != 0) {
-					double x = tempList.get(i) * idfList.get(i);
+			int[] tempList = entry.getValue();
+			for (int i = 0; i < tempList.length; i++) {
+				if (tempList[i] != 0) {
+					double x = tempList[i] * idfList.get(i);
 					double y = x / termFrequencyList.get(i);
 					finalVectorList.set(i, y);
 				}
