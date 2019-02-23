@@ -14,9 +14,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
+
+import org.apache.tomcat.util.buf.UDecoder;
+
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -29,9 +31,9 @@ public class SearchAlgorithm {
 	static List<String> docTerms = null;
 	static LinkedHashMap<Integer, ArrayList<String>> documentMap = new LinkedHashMap<Integer, ArrayList<String>>();
 	static LinkedHashSet<String> hashSet = new LinkedHashSet<String>();
-	static ArrayList<Double> finalVectorList = null;
-	static LinkedHashMap<Integer, int[]> documentPrimaryVectorMap = new LinkedHashMap<Integer, int[]>();
-	static LinkedHashMap<Integer, ArrayList<Double>> documentFinalVectorMap = new LinkedHashMap<Integer, ArrayList<Double>>();
+	static LinkedHashMap<Integer, Double> finalVectorList = null;
+	static LinkedHashMap<Integer, LinkedHashMap<Integer, Integer>> documentPrimaryVectorMap = new LinkedHashMap<Integer, LinkedHashMap<Integer, Integer>>();
+	static LinkedHashMap<Integer, LinkedHashMap<Integer, Double>> documentFinalVectorMap = new LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>();
 	static PrintWriter printWriter = null;
 	static LinkedHashMap<String, Integer> documentFrquencyMapOfTerms = new LinkedHashMap<String, Integer>();
 	static LinkedHashMap<String, Integer> termFrequencyMapOfTerms = new LinkedHashMap<String, Integer>();
@@ -152,7 +154,7 @@ public class SearchAlgorithm {
 		printWriter = new PrintWriter(new File("C:\\Users\\Tanveer\\Downloads\\tmdb-5000-movie-dataset\\Sample.txt"));
 		ArrayList<String> queryList = new ArrayList<String>();
 		LinkedHashMap<String, Integer> queryTermFrequencyMap = new LinkedHashMap<String, Integer>();
-		List<Double> queryVectorList = new ArrayList<Double>(Collections.nCopies(hashSet.size(), new Double(0)));
+		LinkedHashMap<Integer, Double> queryVectorList = new LinkedHashMap<Integer, Double>();
 		List<String> split = Arrays.asList(query.toLowerCase().split(" "));
 		ArrayList<String> splitList = new ArrayList<String>(split);
 		Comparator<CustomMap> scoreComparator = (e1, e2) -> {
@@ -183,36 +185,35 @@ public class SearchAlgorithm {
 			}
 			queryTermFrequencyMap.put(queryTerm, queryCounter);
 		});
-		Iterator<String> iterator = hashSet.iterator();
-		for (int i = 0; iterator.hasNext(); i++) {
-			String term = iterator.next();
-			Iterator<String> queryIterator = queryHashSet.iterator();
-			while (queryIterator.hasNext()) {
-				String queryTerm = queryIterator.next();
-				if (term.equalsIgnoreCase(queryTerm)) {
-					queryVectorList.set(i, queryTermFrequencyMap.get(queryTerm) * idfList.get(i));
+		LinkedHashMap<Integer, Double> queryFinalVectorMap = new LinkedHashMap<Integer, Double>();
+		queryTermFrequencyMap.forEach((queryTerm, frequency) -> {
+			queryFinalVectorMap.put(uniqueTermList.indexOf(queryTerm),
+					frequency * idfList.get(uniqueTermList.indexOf(queryTerm)));
+		});
+		double y =0;
+		for (Entry<Integer, Double> entry : queryFinalVectorMap.entrySet()) {
+			y+= entry.getValue() * entry.getValue();
+		}
+		for (Entry<Integer, LinkedHashMap<Integer, Double>> entry : documentFinalVectorMap.entrySet()) {
+			double x = 0;
+			double val =0;
+			double cosineSimilarity = 0;
+			for (Entry<Integer, Double> entryInner: entry.getValue().entrySet()) {
+				x += entryInner.getValue() * entryInner.getValue();
+			}
+			for (Entry<Integer, Double> entryInner : queryFinalVectorMap.entrySet()) {
+				if(entry.getValue().containsKey(entryInner.getKey())) {
+					Double double1 = entry.getValue().get(entryInner.getKey());
+					Double double2  = entryInner.getValue();
+					val +=  double1 * double2;
 				}
 			}
+			if(val > 0) {
+				cosineSimilarity = val / (x * y);
+			}
+			treeMap.put(new CustomMap(entry.getKey(), cosineSimilarity, movieNameMap.get(entry.getKey())),
+					overviewMap.get(entry.getKey()));
 		}
-		documentFinalVectorMap.forEach((document, vectorList) -> {
-			double x = 0;
-			double y = 0;
-			double value = 0;
-			double cosineSimilarity = 0;
-			for (int i = 0; i < vectorList.size(); i++) {
-				if (queryVectorList.get(i) > 0 && vectorList.get(i) > 0)
-					value = value + vectorList.get(i) * queryVectorList.get(i);
-				if (vectorList.get(i) > 0)
-					x = x + (vectorList.get(i) * vectorList.get(i));
-				if (queryVectorList.get(i) > 0)
-					y = y + (queryVectorList.get(i) * queryVectorList.get(i));
-			}
-			if (x > 0 && y > 0 && value > 0) {
-				cosineSimilarity = value / (x * y);
-			}
-			treeMap.put(new CustomMap(document, cosineSimilarity, movieNameMap.get(document)),
-					overviewMap.get(document));
-		});
 		return treeMap;
 	}
 
@@ -258,29 +259,31 @@ public class SearchAlgorithm {
 		});
 
 		for (Entry<Integer, ArrayList<String>> document : documentMap.entrySet()) {
-			int[] vectors = new int[hashSet.size()];
+			LinkedHashMap<Integer, Integer> vectorMap = new LinkedHashMap<Integer, Integer>();
 			ArrayList<String> wordList = document.getValue();
-			for(int i=0; i<wordList.size(); i++) {
-				vectors[uniqueTermList.indexOf(wordList.get(i))]++;
+			for (int i = 0; i < wordList.size(); i++) {
+				if (vectorMap.containsKey(uniqueTermList.indexOf(wordList.get(i)))) {
+					int intValue = vectorMap.get(uniqueTermList.indexOf(wordList.get(i))).intValue();
+					vectorMap.replace(uniqueTermList.indexOf(wordList.get(i)), ++intValue);
+				} else {
+					vectorMap.put(uniqueTermList.indexOf(wordList.get(i)), 0);
+				}
 			}
-			documentPrimaryVectorMap.put(document.getKey(), vectors);
+			documentPrimaryVectorMap.put(document.getKey(), vectorMap);
 		}
-		
-		
+
 	}
 
 	public static void createFinalDocumentVectors() {
 
-		for (Entry<Integer, int[]> entry : documentPrimaryVectorMap.entrySet()) {
-			finalVectorList = new ArrayList<Double>(Collections.nCopies(hashSet.size(), new Double(0)));
-			int[] tempList = entry.getValue();
-			for (int i = 0; i < tempList.length; i++) {
-				if (tempList[i] != 0) {
-					double x = tempList[i] * idfList.get(i);
-					double y = x / termFrequencyList.get(i);
-					finalVectorList.set(i, y);
-				}
-			}
+		for (Entry<Integer, LinkedHashMap<Integer, Integer>> entry : documentPrimaryVectorMap.entrySet()) {
+			finalVectorList = new LinkedHashMap<Integer, Double>();
+			LinkedHashMap<Integer, Integer> vectorMap = entry.getValue();
+			vectorMap.forEach((id, value) -> {
+				double x = value * idfList.get(id);
+				double y = x / termFrequencyList.get(id);
+				finalVectorList.put(id, y);
+			});
 			documentFinalVectorMap.put(entry.getKey(), finalVectorList);
 		}
 	}
