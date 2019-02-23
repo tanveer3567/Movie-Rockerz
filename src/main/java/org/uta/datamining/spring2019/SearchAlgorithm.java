@@ -44,6 +44,7 @@ public class SearchAlgorithm {
 	static List<String> tagsList = null;
 	static ArrayList<String> nameSet = null;
 	static LinkedHashMap<Integer, String> overviewMap = new LinkedHashMap<Integer, String>();
+	static ArrayList<String> uniqueTermList = new ArrayList<String>();
 
 	static String[] stopWords = { "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any",
 			"are", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by",
@@ -98,6 +99,7 @@ public class SearchAlgorithm {
 					}
 				}
 			});
+			hashSet.forEach(term -> uniqueTermList.add(term));
 			documentAndTermFrequencyOfEachTerm();
 			calculateIdf();
 			createPrimaryDocumentVectors();
@@ -254,24 +256,19 @@ public class SearchAlgorithm {
 		});
 
 		for (Entry<Integer, ArrayList<String>> document : documentMap.entrySet()) {
-			ArrayList<Integer> vectorList = new ArrayList<Integer>(Collections.nCopies(hashSet.size(), 0));
-
+			ArrayList<Integer> tempList = new ArrayList<Integer>(Collections.nCopies(hashSet.size(), 0));
 			document.getValue().forEach(word -> {
-				Iterator<String> iterator = hashSet.iterator();
-				int i = 0;
-				while (iterator.hasNext()) {
-					String next = iterator.next();
-					if (next.equalsIgnoreCase(word)) {
-						Integer integer = vectorList.get(i);
-						int intValue = integer.intValue();
-						intValue += 1;
-						vectorList.set(i, intValue);
-					}
-					i++;
+				if(uniqueTermList.contains(word)) {
+					int index = uniqueTermList.indexOf(word);
+					Integer integer = tempList.get(index);
+					int intValue = integer.intValue();
+					tempList.set(index, ++intValue);
 				}
 			});
-			documentPrimaryVectorMap.put(document.getKey(), vectorList);
+			documentPrimaryVectorMap.put(document.getKey(), tempList);
 		}
+		
+		
 	}
 
 	public static void createFinalDocumentVectors() {
