@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -29,7 +30,7 @@ public class SearchAlgorithm {
 	static LinkedHashMap<Integer, ArrayList<String>> documentMap = new LinkedHashMap<Integer, ArrayList<String>>();
 	static LinkedHashSet<String> hashSet = new LinkedHashSet<String>();
 	static ArrayList<Double> finalVectorList = null;
-	static LinkedHashMap<Integer, ArrayList<Integer>> documentPrimaryVectorMap = new LinkedHashMap<Integer, ArrayList<Integer>>();
+	static LinkedHashMap<Integer, List<Integer>> documentPrimaryVectorMap = new LinkedHashMap<Integer, List<Integer>>();
 	static LinkedHashMap<Integer, ArrayList<Double>> documentFinalVectorMap = new LinkedHashMap<Integer, ArrayList<Double>>();
 	static PrintWriter printWriter = null;
 	static LinkedHashMap<String, Integer> documentFrquencyMapOfTerms = new LinkedHashMap<String, Integer>();
@@ -155,11 +156,11 @@ public class SearchAlgorithm {
 		List<String> split = Arrays.asList(query.toLowerCase().split(" "));
 		ArrayList<String> splitList = new ArrayList<String>(split);
 		Comparator<CustomMap> scoreComparator = (e1, e2) -> {
-			if(e1.getScore() > e2.getScore()){
-	            return -1;
-	        } else {
-	            return 1;
-	        }
+			if (e1.getScore() > e2.getScore()) {
+				return -1;
+			} else {
+				return 1;
+			}
 		};
 		TreeMap<CustomMap, String> treeMap = new TreeMap<CustomMap, String>(scoreComparator);
 		for (int i = 0; i < splitList.size(); i++) {
@@ -209,7 +210,8 @@ public class SearchAlgorithm {
 			if (x > 0 && y > 0 && value > 0) {
 				cosineSimilarity = value / (x * y);
 			}
-			treeMap.put(new CustomMap(document,cosineSimilarity,movieNameMap.get(document)), overviewMap.get(document));
+			treeMap.put(new CustomMap(document, cosineSimilarity, movieNameMap.get(document)),
+					overviewMap.get(document));
 		});
 		return treeMap;
 	}
@@ -256,16 +258,12 @@ public class SearchAlgorithm {
 		});
 
 		for (Entry<Integer, ArrayList<String>> document : documentMap.entrySet()) {
-			ArrayList<Integer> tempList = new ArrayList<Integer>(Collections.nCopies(hashSet.size(), 0));
-			document.getValue().forEach(word -> {
-				if(uniqueTermList.contains(word)) {
-					int index = uniqueTermList.indexOf(word);
-					Integer integer = tempList.get(index);
-					int intValue = integer.intValue();
-					tempList.set(index, ++intValue);
-				}
-			});
-			documentPrimaryVectorMap.put(document.getKey(), tempList);
+			int[] vectors = new int[hashSet.size()];
+			ArrayList<String> wordList = document.getValue();
+			for(int i=0; i<wordList.size(); i++) {
+				vectors[uniqueTermList.indexOf(wordList.get(i))]++;
+			}
+			documentPrimaryVectorMap.put(document.getKey(), Arrays.stream(vectors).boxed().collect(Collectors.toList()));
 		}
 		
 		
@@ -273,9 +271,9 @@ public class SearchAlgorithm {
 
 	public static void createFinalDocumentVectors() {
 
-		for (Entry<Integer, ArrayList<Integer>> entry : documentPrimaryVectorMap.entrySet()) {
+		for (Entry<Integer, List<Integer>> entry : documentPrimaryVectorMap.entrySet()) {
 			finalVectorList = new ArrayList<Double>(Collections.nCopies(hashSet.size(), new Double(0)));
-			ArrayList<Integer> tempList = entry.getValue();
+			List<Integer> tempList = entry.getValue();
 			for (int i = 0; i < tempList.size(); i++) {
 				if (tempList.get(i) != 0) {
 					double x = tempList.get(i) * idfList.get(i);
