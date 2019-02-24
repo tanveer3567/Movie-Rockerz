@@ -190,25 +190,25 @@ public class SearchAlgorithm {
 			queryFinalVectorMap.put(uniqueTermList.indexOf(queryTerm),
 					frequency * idfList.get(uniqueTermList.indexOf(queryTerm)));
 		});
-		double y =0;
+		double y = 0;
 		for (Entry<Integer, Double> entry : queryFinalVectorMap.entrySet()) {
-			y+= entry.getValue() * entry.getValue();
+			y += entry.getValue() * entry.getValue();
 		}
 		for (Entry<Integer, LinkedHashMap<Integer, Double>> entry : documentFinalVectorMap.entrySet()) {
 			double x = 0;
-			double val =0;
+			double val = 0;
 			double cosineSimilarity = 0;
-			for (Entry<Integer, Double> entryInner: entry.getValue().entrySet()) {
+			for (Entry<Integer, Double> entryInner : entry.getValue().entrySet()) {
 				x += entryInner.getValue() * entryInner.getValue();
 			}
 			for (Entry<Integer, Double> entryInner : queryFinalVectorMap.entrySet()) {
-				if(entry.getValue().containsKey(entryInner.getKey())) {
+				if (entry.getValue().containsKey(entryInner.getKey())) {
 					Double double1 = entry.getValue().get(entryInner.getKey());
-					Double double2  = entryInner.getValue();
-					val +=  double1 * double2;
+					Double double2 = entryInner.getValue();
+					val += double1 * double2;
 				}
 			}
-			if(val > 0) {
+			if (val > 0) {
 				cosineSimilarity = val / (x * y);
 			}
 			treeMap.put(new CustomMap(entry.getKey(), cosineSimilarity, movieNameMap.get(entry.getKey())),
@@ -264,9 +264,9 @@ public class SearchAlgorithm {
 			for (int i = 0; i < wordList.size(); i++) {
 				if (vectorMap.containsKey(uniqueTermList.indexOf(wordList.get(i)))) {
 					int intValue = vectorMap.get(uniqueTermList.indexOf(wordList.get(i))).intValue();
-					vectorMap.replace(uniqueTermList.indexOf(wordList.get(i)), ++intValue);
+					vectorMap.put(uniqueTermList.indexOf(wordList.get(i)), ++intValue);
 				} else {
-					vectorMap.put(uniqueTermList.indexOf(wordList.get(i)), 0);
+					vectorMap.put(uniqueTermList.indexOf(wordList.get(i)), 1);
 				}
 			}
 			documentPrimaryVectorMap.put(document.getKey(), vectorMap);
