@@ -209,7 +209,7 @@ public class SearchAlgorithm {
 				}
 			}
 			if (val > 0) {
-				cosineSimilarity = val / (x * y);
+				cosineSimilarity = val / (Math.sqrt(x) * Math.sqrt(y));
 			}
 			treeMap.put(new CustomMap(entry.getKey(), cosineSimilarity, movieNameMap.get(entry.getKey())),
 					overviewMap.get(entry.getKey()));
