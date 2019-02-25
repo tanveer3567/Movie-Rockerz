@@ -41,7 +41,6 @@ public class SearchAlgorithm {
 	static int frquencyCounter = 0;
 	static List<Integer> termFrequencyList = new ArrayList<Integer>();
 	static List<Double> idfList = new ArrayList<Double>();
-	static LinkedHashSet<String> queryHashSet = new LinkedHashSet<String>();
 	static LinkedHashMap<Integer, ArrayList<Double>> queryVectorMap = new LinkedHashMap<Integer, ArrayList<Double>>();
 	static LinkedHashMap<Integer, String> movieNameMap = new LinkedHashMap<Integer, String>();
 	static List<String> tagsList = null;
@@ -152,6 +151,7 @@ public class SearchAlgorithm {
 	private static TreeMap<CustomMap, String> getQuery(String query) throws FileNotFoundException {
 
 		printWriter = new PrintWriter(new File("C:\\Users\\Tanveer\\Downloads\\tmdb-5000-movie-dataset\\Sample.txt"));
+		LinkedHashSet<String> queryHashSet = new LinkedHashSet<String>();
 		ArrayList<String> queryList = new ArrayList<String>();
 		LinkedHashMap<String, Integer> queryTermFrequencyMap = new LinkedHashMap<String, Integer>();
 		LinkedHashMap<Integer, Double> queryVectorList = new LinkedHashMap<Integer, Double>();
@@ -187,8 +187,10 @@ public class SearchAlgorithm {
 		});
 		LinkedHashMap<Integer, Double> queryFinalVectorMap = new LinkedHashMap<Integer, Double>();
 		queryTermFrequencyMap.forEach((queryTerm, frequency) -> {
-			queryFinalVectorMap.put(uniqueTermList.indexOf(queryTerm),
-					frequency * idfList.get(uniqueTermList.indexOf(queryTerm)));
+			if(uniqueTermList.contains(queryTerm)) {
+				queryFinalVectorMap.put(uniqueTermList.indexOf(queryTerm),
+						frequency * idfList.get(uniqueTermList.indexOf(queryTerm)));
+			}
 		});
 		double y = 0;
 		for (Entry<Integer, Double> entry : queryFinalVectorMap.entrySet()) {
