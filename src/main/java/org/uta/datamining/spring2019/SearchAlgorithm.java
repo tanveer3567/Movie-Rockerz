@@ -13,8 +13,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.TreeMap;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,13 +23,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 
-import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.util.CoreMap;
+import opennlp.tools.stemmer.PorterStemmer;
 
 public class SearchAlgorithm {
 
@@ -51,6 +46,7 @@ public class SearchAlgorithm {
 	static ArrayList<String> nameSet = null;
 	static LinkedHashMap<Integer, String> overviewMap = new LinkedHashMap<Integer, String>();
 	static ArrayList<String> uniqueTermList = new ArrayList<String>();
+	static LinkedHashMap<Integer, String> movieUrlMap = new LinkedHashMap<Integer, String>();
 
 	static String[] stopWords = { "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any",
 			"are", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by",
@@ -68,28 +64,33 @@ public class SearchAlgorithm {
 
 	public static void preLoad() throws FileNotFoundException {
 
-		String moviesDataSet = "src/tmdb_5000_movies.csv";
+		String moviesDataSet = "/src/tmdb_5000_movies.csv";
 		try {
-			FileReader filereader = new FileReader(new File(moviesDataSet));
+			String property = System.getProperty("user.dir");
+			FileReader filereader = new FileReader(new File(property+moviesDataSet));
 			CSVReader csvReader = new CSVReader(filereader);
 			String[] nextRecord;
 			int k = 0;
 			while ((nextRecord = csvReader.readNext()) != null) {
 				if (k > 0) {
 					String name = nextRecord[6];
-					StringBuffer lemmatize2 = lemmatize(new StringBuffer(name));
-					String[] nameSplit = lemmatize2.toString().toLowerCase().split(" ");
+					String[] nameSplit = name.toLowerCase().split(" ");
 					readName(nameSplit);
 					String overview = nextRecord[7];
-					StringBuffer lemmatize = lemmatize(new StringBuffer(overview));
-					String[] split = lemmatize.toString().toLowerCase().split(" ");
+					String[] split = overview.toLowerCase().split(" ");
+					for(int i=0; i<split.length; i++) {
+						split[i] = stem(split[i]);
+					}
+					readTags(nextRecord);
 					docTerms = Arrays.asList(split);
 					ArrayList<String> tempList = new ArrayList<String>(docTerms);
-					tempList.addAll(readTags(nextRecord));
+					tempList.addAll(tagsList);
 					tempList.addAll(nameSet);
-					documentMap.put(Integer.parseInt(nextRecord[3]), tempList);
-					movieNameMap.put(Integer.parseInt(nextRecord[3]), name);
-					overviewMap.put(Integer.parseInt(nextRecord[3]), overview);
+					int record = Integer.parseInt(nextRecord[3]);
+					documentMap.put(record, tempList);
+					movieNameMap.put(record, name);
+					overviewMap.put(record, overview);
+					movieUrlMap.put(record, nextRecord[2]);
 				}
 				k++;
 			}
@@ -120,13 +121,15 @@ public class SearchAlgorithm {
 
 	public static LinkedHashMap<CustomMap, String> search(String search) throws FileNotFoundException {
 
-		TreeMap<CustomMap, String> query = getQuery(search);
 		LinkedHashMap<CustomMap, String> finalResults = new LinkedHashMap<CustomMap, String>();
-		query.forEach((customMap, overview) -> {
-			if (customMap.getScore() > 0) {
-				finalResults.put(customMap, overview);
-			}
-		});
+		if(StringUtils.isNoneBlank(search)) {
+			TreeMap<CustomMap, String> query = getQuery(search);
+			query.forEach((customMap, overview) -> {
+				if (customMap.getScore() > 0) {
+					finalResults.put(customMap, overview);
+				}
+			});
+		}
 		return finalResults;
 	}
 
@@ -134,38 +137,35 @@ public class SearchAlgorithm {
 
 		nameSet = new ArrayList<String>();
 		for (int i = 0; i < nameSplit.length; i++) {
-			nameSet.add(nameSplit[i]);
+			nameSet.add(stem(nameSplit[i]));
 		}
 	}
 
-	private static ArrayList<String> readTags(String[] nextRecord) throws JsonParseException, JsonMappingException, IOException {
+	private static void readTags(String[] nextRecord) throws JsonParseException, JsonMappingException, IOException {
 
-		ArrayList<String> tagsList = new ArrayList<String>();
+		tagsList = new ArrayList<String>();
 		String tagsJson = nextRecord[4];
 		ObjectMapper mapper = new ObjectMapper();
 		List<Tag> tagList = mapper.readValue(tagsJson, new TypeReference<List<Tag>>() {
 		});
-		StringBuffer buff = new StringBuffer();
 		tagList.forEach(tag -> {
-			String[] split1 = tag.getName().toLowerCase().split(" ");
-			for (int i = 0; i < split1.length; i++) {
-				buff.append(split1[i]);
-				buff.append(" ");
+			String[] split = tag.getName().toLowerCase().split(" ");
+			for (int i = 0; i < split.length; i++) {
+				tagsList.add(stem(split[i]));
 			}
 		});
-		String[] split2 = lemmatize(buff).toString().toLowerCase().split(" ");
-		for(int i=0; i<split2.length; i++) {
-			tagsList.add(split2[i]);
-		}
-		return tagsList;
 	}
 
 	private static TreeMap<CustomMap, String> getQuery(String query) throws FileNotFoundException {
-
+		
 		LinkedHashSet<String> queryHashSet = new LinkedHashSet<String>();
 		ArrayList<String> queryList = new ArrayList<String>();
 		LinkedHashMap<String, Integer> queryTermFrequencyMap = new LinkedHashMap<String, Integer>();
-		List<String> split = Arrays.asList(lemmatize(new StringBuffer(query)).toString().toLowerCase().split(" "));
+		String[] split2 = query.toLowerCase().split(" ");
+		for(int i=0; i<split2.length; i++) {
+			split2[i] = stem(split2[i]);
+		}
+		List<String> split = Arrays.asList(split2);
 		ArrayList<String> splitList = new ArrayList<String>(split);
 		Comparator<CustomMap> scoreComparator = (e1, e2) -> {
 			if (e1.getScore() > e2.getScore()) {
@@ -223,7 +223,7 @@ public class SearchAlgorithm {
 			if (val > 0) {
 				cosineSimilarity = val / (Math.sqrt(x) * Math.sqrt(y));
 			}
-			treeMap.put(new CustomMap(entry.getKey(), cosineSimilarity, movieNameMap.get(entry.getKey())),
+			treeMap.put(new CustomMap(entry.getKey(), cosineSimilarity, movieNameMap.get(entry.getKey()), movieUrlMap.get(entry.getKey())),
 					overviewMap.get(entry.getKey()));
 		}
 		return treeMap;
@@ -336,23 +336,7 @@ public class SearchAlgorithm {
 		return isModified ? term : null;
 	}
 
-	public static StringBuffer lemmatize(StringBuffer buffer) {
-
-		StringBuffer buff = new StringBuffer();
-		Properties props = new Properties(); 
-        props.put("annotators", "tokenize, ssplit, pos, lemma"); 
-        StanfordCoreNLP pipeline = new StanfordCoreNLP(props, false);
-        Annotation document = pipeline.process(buffer.toString());  
-
-        for(CoreMap sentence: document.get(SentencesAnnotation.class))
-        {    
-            for(CoreLabel token: sentence.get(TokensAnnotation.class))
-            {       
-                String lemma = token.get(LemmaAnnotation.class);
-                buff.append(lemma);
-                buff.append(" ");
-            }
-        }
-        return buff;
+	public static String stem(String word) {
+		return new PorterStemmer().stem(word);
 	}
 }

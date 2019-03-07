@@ -5,11 +5,14 @@
 	xmlns:form="http://form" xmlns:field="http://field">
 <head>
 <meta charset="ISO-8859-1">
-<title>Movie Recommendation System</title>
+<title>Movie Rockerz</title>
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-<script type="text/javascript"
-	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script
+	src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <style type="text/css">
 h1 {
 	text-align: center;
@@ -26,14 +29,37 @@ h1 {
 .block-with-text {
 	overflow: hidden;
 	display: -webkit-box;
-	-webkit-line-clamp: 3;
+	-webkit-line-clamp: 2;
 	-webkit-box-orient: vertical;
+}
+
+.toolltip {
+	position: relative;
+	display: inline-block;
+}
+
+.toolltip .toolltiptext {
+	visibility: hidden;
+	width: 360px;
+	background-color: gray;
+	color: #fff;
+	text-align: justify;
+	border-radius: 6px;
+	padding: 5px;
+	/* Position the tooltip */
+	position: absolute;
+	z-index: 5;
+	position: absolute;
+}
+
+.toolltip:hover .toolltiptext {
+	visibility: visible;
 }
 </style>
 </head>
 <body class="body">
 	<nav class="navbar navbar-expand-md navcolor navbar-dark sticky-top">
-		<a class="navbar-brand" href="#">Movie Rockers</a>
+		<a class="navbar-brand" href="#">Movie Rockerz</a>
 		<button class="navbar-toggler navbar-toggler-right" type="button"
 			data-toggle="collapse" data-target="#navb" aria-expanded="true">
 			<span class="navbar-toggler-icon"></span>
@@ -53,7 +79,7 @@ h1 {
 		<div class="row">
 			<div class="col-md-2"></div>
 			<div class="col-md-8">
-				<form action="/nothing">
+				<form action="/movierockerz">
 					<div class="form-group row">
 						<div class="col-md-10">
 							<input class="form-control" id="ex3" type="text"
@@ -70,7 +96,9 @@ h1 {
 		<br />
 		<div class="row">
 			<h5 th:text="${count}"></h5>
-			<h5>&nbsp;movies found</h5>
+			<h5>&nbsp;movies found for&nbsp; "</h5>
+			<h5 th:text="${search}"></h5>
+			<h5>"</h5>
 		</div>
 		<br />
 		<div class="row">
@@ -79,9 +107,10 @@ h1 {
 					<div class="card-header bgcol">
 						<p th:text="${movie.key.getName()}" />
 					</div>
-					<div class="card-body text-dark">
-						<p class="card-text wrap-text block-with-text"
-							th:text="${movie.value}" />
+					<div class="toolltip card-body text-dark">
+						<p class="card-text block-with-text" th:text="${movie.value}" />
+						<a th:href="${movie.key.getUrl()}">more details</a>
+						<small class="toolltiptext" th:text="${movie.value}"></small>
 					</div>
 				</div>
 			</div>

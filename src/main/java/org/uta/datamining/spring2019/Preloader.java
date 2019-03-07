@@ -9,17 +9,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class Preloader {
 
-	private Runnable preload = () -> {
+	@PostConstruct
+	private void init() {
 		try {
 			SearchAlgorithm.preLoad();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-	};
-	
-	@PostConstruct
-	private void init() {
-		Thread t = new Thread(preload);
-		t.start();
 	}
 }

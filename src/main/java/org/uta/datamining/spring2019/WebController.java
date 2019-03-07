@@ -11,12 +11,13 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class WebController {
 
-	@GetMapping("/nothing")
+	@GetMapping("/movierockerz")
 	public ModelAndView getNothing(@RequestParam(name = "search", required = true) String search)
 			throws FileNotFoundException {
 		LinkedHashMap<CustomMap, String> result = SearchAlgorithm.search(search);
 		ModelAndView movies = new ModelAndView("result");
 		movies.addObject("count", result.size());
+		movies.addObject("search", search);
 		movies.addObject("movieMap",result);
 		return movies;
 	}
