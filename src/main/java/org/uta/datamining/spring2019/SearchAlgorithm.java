@@ -58,7 +58,7 @@ public class SearchAlgorithm {
 			"she's", "should", "so", "some", "such", "than", "that", "thats", "that's", "the", "their", "theirs",
 			"them", "themselves", "then", "there", "theres", "there's", "these", "they", "they'd", "they'll", "they're",
 			"they've", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "we", "we'd",
-			"we'll", "we're", "we've", "were", "what", "what's", "when", "when?s", "where", "where?s", "which", "while",
+			"we'll", "we're", "we've", "were", "what", "what's", "when", "when's", "where", "where's", "which", "while",
 			"who", "who's", "whom", "why", "why's", "with", "would", "you", "you'd", "you'll", "you're", "you've",
 			"your", "yours", "yourself", "yourselves" };
 
