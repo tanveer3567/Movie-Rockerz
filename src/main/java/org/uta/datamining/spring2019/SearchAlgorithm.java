@@ -47,6 +47,7 @@ public class SearchAlgorithm {
 	static LinkedHashMap<Integer, String> overviewMap = new LinkedHashMap<Integer, String>();
 	static ArrayList<String> uniqueTermList = new ArrayList<String>();
 	static LinkedHashMap<Integer, String> movieUrlMap = new LinkedHashMap<Integer, String>();
+	static LinkedHashMap<Integer, List<String>> tagsMap = new LinkedHashMap<Integer, List<String>>();
 
 	static String[] stopWords = { "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any",
 			"are", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by",
@@ -67,7 +68,7 @@ public class SearchAlgorithm {
 		String moviesDataSet = "/src/tmdb_5000_movies.csv";
 		try {
 			String property = System.getProperty("user.dir");
-			FileReader filereader = new FileReader(new File(property+moviesDataSet));
+			FileReader filereader = new FileReader(new File(property + moviesDataSet));
 			CSVReader csvReader = new CSVReader(filereader);
 			String[] nextRecord;
 			int k = 0;
@@ -78,7 +79,7 @@ public class SearchAlgorithm {
 					readName(nameSplit);
 					String overview = nextRecord[7];
 					String[] split = overview.toLowerCase().split(" ");
-					for(int i=0; i<split.length; i++) {
+					for (int i = 0; i < split.length; i++) {
 						split[i] = stem(split[i]);
 					}
 					readTags(nextRecord);
@@ -91,6 +92,7 @@ public class SearchAlgorithm {
 					movieNameMap.put(record, name);
 					overviewMap.put(record, overview);
 					movieUrlMap.put(record, nextRecord[2]);
+					tagsMap.put(record, tagsList);
 				}
 				k++;
 			}
@@ -122,7 +124,7 @@ public class SearchAlgorithm {
 	public static LinkedHashMap<CustomMap, String> search(String search) throws FileNotFoundException {
 
 		LinkedHashMap<CustomMap, String> finalResults = new LinkedHashMap<CustomMap, String>();
-		if(StringUtils.isNoneBlank(search)) {
+		if (StringUtils.isNoneBlank(search)) {
 			TreeMap<CustomMap, String> query = getQuery(search);
 			query.forEach((customMap, overview) -> {
 				if (customMap.getScore() > 0) {
@@ -157,12 +159,12 @@ public class SearchAlgorithm {
 	}
 
 	private static TreeMap<CustomMap, String> getQuery(String query) throws FileNotFoundException {
-		
+
 		LinkedHashSet<String> queryHashSet = new LinkedHashSet<String>();
 		ArrayList<String> queryList = new ArrayList<String>();
 		LinkedHashMap<String, Integer> queryTermFrequencyMap = new LinkedHashMap<String, Integer>();
 		String[] split2 = query.toLowerCase().split(" ");
-		for(int i=0; i<split2.length; i++) {
+		for (int i = 0; i < split2.length; i++) {
 			split2[i] = stem(split2[i]);
 		}
 		List<String> split = Arrays.asList(split2);
@@ -223,7 +225,9 @@ public class SearchAlgorithm {
 			if (val > 0) {
 				cosineSimilarity = val / (Math.sqrt(x) * Math.sqrt(y));
 			}
-			treeMap.put(new CustomMap(entry.getKey(), cosineSimilarity, movieNameMap.get(entry.getKey()), movieUrlMap.get(entry.getKey())),
+			treeMap.put(
+					new CustomMap(entry.getKey(), cosineSimilarity, movieNameMap.get(entry.getKey()),
+							movieUrlMap.get(entry.getKey()), tagsMap.get(entry.getKey())),
 					overviewMap.get(entry.getKey()));
 		}
 		return treeMap;

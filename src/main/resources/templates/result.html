@@ -8,14 +8,20 @@
 <title>Movie Rockerz</title>
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script
-	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script	
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 <script
-	src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <style type="text/css">
 h1 {
 	text-align: center;
+}
+
+.highlight {
+	background-color: yellow;
 }
 
 .navcolor {
@@ -83,7 +89,8 @@ h1 {
 					<div class="form-group row">
 						<div class="col-md-10">
 							<input class="form-control" id="ex3" type="text"
-								placeholder="type here" name="search">
+								placeholder="type here" name="search"> <input
+								type="hidden" id="page" name="page" value="1">
 						</div>
 						<div class="input-group-btn">
 							<button class="btn btn-primary mb-2" type="submit">search</button>
@@ -96,24 +103,41 @@ h1 {
 		<br />
 		<div class="row">
 			<h5 th:text="${count}"></h5>
-			<h5>&nbsp;movies found for&nbsp; "</h5>
+			<h5>&nbsp;movies found for&nbsp;"</h5>
 			<h5 th:text="${search}"></h5>
 			<h5>"</h5>
 		</div>
 		<br />
 		<div class="row">
-			<div class="col-md-3" th:each="movie : ${movieMap}">
-				<div class="card border-dark mb-4" style="max-width: 18rem;">
-					<div class="card-header bgcol">
-						<p th:text="${movie.key.getName()}" />
+			<div th:each="movie : ${movieMap}">
+				<div class="col-md-10">
+					<br />
+					<div class="bgcol">
+						<a th:href="${movie.getCustomMap().getUrl()}"
+							th:text="${movie.getCustomMap().getName()}"></a> <em
+							th:text="${movie.getCustomMap().getUrl()}"></em>
 					</div>
-					<div class="toolltip card-body text-dark">
-						<p class="card-text block-with-text" th:text="${movie.value}" />
-						<a th:href="${movie.key.getUrl()}">more details</a>
-						<small class="toolltiptext" th:text="${movie.value}"></small>
+					<div>
+						<p class="card-text text-justify text-dark"
+							th:text="${movie.getOverview()}" />
+					</div>
+					<span style="float: left">Tags:&nbsp;</span>
+					<div style="text-align: right; width: 100%"
+						th:each="tag : ${movie.getCustomMap().getTagList()}">
+						<em style="float: left" th:text="${tag}"></em> <em
+							style="float: left">,&nbsp;</em>
 					</div>
 				</div>
 			</div>
+		</div>
+		<br />
+		<br />
+		<div class="row justify-content-center">
+			<ul class="pagination pagination-sm">
+				<th:block th:each="i: ${#numbers.sequence(1, noOfPages)}">
+					<li class="page-item"><a class="page-link" th:href="@{/movierockerz(search=${search},page=${i})}" th:text="${i}"></a></li>
+				</th:block>
+			</ul>
 		</div>
 	</div>
 	<br />

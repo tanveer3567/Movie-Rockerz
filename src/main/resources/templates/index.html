@@ -6,15 +6,21 @@
 <head>
 <meta charset="ISO-8859-1">
 <title>Movie Rockerz</title>
-<link rel="stylesheet"
-	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-<script type="text/javascript"
-	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+	var logfun = function() {
+		console.log("logged");
+	}
+</script>
 <style type="text/css">
 h1 {
 	text-align: center;
 }
-.navcolor{
+
+.navcolor {
 	background-color: #513CA3;
 }
 </style>
@@ -45,7 +51,8 @@ h1 {
 					<div class="form-group row">
 						<div class="col-md-10">
 							<input class="form-control" id="ex3" type="text"
-								placeholder="type here" name="search">
+								placeholder="type here" name="search" />
+							<input type="hidden" id="page" name="page" value="1">
 						</div>
 						<div class="input-group-btn">
 							<button class="btn btn-primary mb-2" type="submit">search</button>
