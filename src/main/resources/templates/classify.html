@@ -10,11 +10,6 @@
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<script type="text/javascript">
-	var logfun = function() {
-		console.log("logged");
-	}
-</script>
 <style type="text/css">
 h1 {
 	text-align: center;
@@ -34,8 +29,8 @@ h1 {
 		</button>
 		<div id="navb" class="navbar-collapse collapse hide">
 			<ul class="nav navbar-nav ml-auto">
-				<li class="nav-item"><a class="nav-link" href="/movierockerz/classifier"><span
-						class="fas fa-user"></span> Classifier</a></li>
+				<li class="nav-item"><a class="nav-link" href="/movierockerz"><span
+						class="fas fa-user"></span> Search</a></li>
 				<li class="nav-item"><a class="nav-link" href="#"><span
 						class="fas fa-user"></span> Sign Up</a></li>
 				<li class="nav-item"><a class="nav-link" href="#"><span
@@ -49,15 +44,14 @@ h1 {
 		<div class="row">
 			<div class=col-md-2></div>
 			<div class=col-md-8>
-				<form action="/movierockerz">
+				<form action="/movierockerz/classifier">
 					<div class="form-group row">
 						<div class="col-md-10">
 							<input class="form-control" id="ex3" type="text"
-								placeholder="type here" name="search" />
-							<input type="hidden" id="page" name="page" value="1">
+								placeholder="type here" name="classify" />
 						</div>
 						<div class="input-group-btn">
-							<button class="btn btn-primary mb-2" type="submit">search</button>
+							<button class="btn btn-primary mb-2" type="submit">classify</button>
 						</div>
 					</div>
 				</form>

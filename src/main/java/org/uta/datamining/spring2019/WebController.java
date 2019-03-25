@@ -3,8 +3,10 @@ package org.uta.datamining.spring2019;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,8 +20,12 @@ public class WebController {
 	int noOfPages = 0;
 
 	@GetMapping("/movierockerz")
-	public ModelAndView getNothing(@RequestParam(name = "page", required = true) int pageNumber,
-			@RequestParam(name = "search", required = true) String search) throws FileNotFoundException {
+	public ModelAndView getNothing(@RequestParam(name = "page", required = false) Integer pageNumber,
+			@RequestParam(name = "search", required = false) String search) throws FileNotFoundException {
+		
+		if(StringUtils.isBlank(search)) {
+			return new ModelAndView("index");
+		}
 		List<Result> partialResult = new ArrayList<Result>();
 		if (pageNumber == 1) {
 			fullResult = SearchAlgorithm.search(search);
@@ -27,9 +33,9 @@ public class WebController {
 			fullResult.forEach((key, value) -> {
 				result.add(new Result(key, value));
 			});
-			noOfPages = (fullResult.size() + 10) / 10;
+			noOfPages = (fullResult.size() + 25) / 25;
 		}
-		for (int i = (pageNumber - 1) * 10; i < pageNumber * 10 && i < result.size(); i++) {
+		for (int i = (pageNumber - 1) * 25; i < pageNumber * 25 && i < result.size(); i++) {
 			partialResult.add(result.get(i));
 		}
 		ModelAndView movies = new ModelAndView("result");
@@ -38,5 +44,20 @@ public class WebController {
 		movies.addObject("movieMap", partialResult);
 		movies.addObject("noOfPages", noOfPages);
 		return movies;
+	}
+	
+	@GetMapping("/movierockerz/classifier")
+	public ModelAndView getNothing(@RequestParam(name = "classify", required=false) String query) throws FileNotFoundException {
+		
+		if(StringUtils.isBlank(query)) {
+			return new ModelAndView("classify");
+		}
+		LinkedList<String> result = ClassiferAlgorithm.classify(query);
+		ModelAndView genre = new ModelAndView("classifyResult");
+		for(int i=0; i<3; i++) {
+			genre.addObject("genre"+i, result.get(i));
+		}
+		genre.addObject("query", query);
+		return genre;
 	}
 }

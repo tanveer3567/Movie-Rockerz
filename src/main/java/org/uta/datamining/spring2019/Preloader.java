@@ -13,6 +13,7 @@ public class Preloader {
 	private void init() {
 		try {
 			SearchAlgorithm.preLoad();
+			ClassiferAlgorithm.preload();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
