@@ -35,10 +35,8 @@ public class SearchAlgorithm {
 	static LinkedHashMap<Integer, LinkedHashMap<Integer, Double>> documentFinalVectorMap = new LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>();
 	static PrintWriter printWriter = null;
 	static LinkedHashMap<String, Integer> documentFrquencyMapOfTerms = new LinkedHashMap<String, Integer>();
-	static LinkedHashMap<String, Integer> termFrequencyMapOfTerms = new LinkedHashMap<String, Integer>();
 	static LinkedHashMap<String, Double> idfMapOfTerms = new LinkedHashMap<String, Double>();
 	static int frquencyCounter = 0;
-	static List<Integer> termFrequencyList = new ArrayList<Integer>();
 	static List<Double> idfList = new ArrayList<Double>();
 	static LinkedHashMap<Integer, ArrayList<Double>> queryVectorMap = new LinkedHashMap<Integer, ArrayList<Double>>();
 	static LinkedHashMap<Integer, String> movieNameMap = new LinkedHashMap<Integer, String>();
@@ -65,7 +63,7 @@ public class SearchAlgorithm {
 
 	public static void preLoad() throws FileNotFoundException {
 
-		String moviesDataSet = "/src/tmdb_5000_movies.csv";
+		String moviesDataSet = "/tmdb_5000_movies.csv";
 		try {
 			String property = System.getProperty("user.dir");
 			FileReader filereader = new FileReader(new File(property + moviesDataSet));
@@ -132,6 +130,14 @@ public class SearchAlgorithm {
 				}
 			});
 		}
+		String property = System.getProperty("user.dir");
+		PrintWriter wr = new PrintWriter(new File(property + "/output.txt"));
+		finalResults.forEach((key, value) -> {
+			wr.write(key.getName() + " : " + key.getScore());
+			wr.write("\n");
+		});
+		wr.flush();
+		wr.close();
 		return finalResults;
 	}
 
@@ -237,21 +243,15 @@ public class SearchAlgorithm {
 
 		hashSet.forEach(term -> {
 			int documentFrequencyCounter = 0;
-			int termFrequencyCounter = 0;
 			for (Entry<Integer, ArrayList<String>> entry : documentMap.entrySet()) {
-				boolean flag = false;
 				for (String word : entry.getValue()) {
 					if (word.equalsIgnoreCase(term)) {
-						if (!flag) {
-							documentFrequencyCounter++;
-							flag = true;
-						}
-						termFrequencyCounter++;
+						documentFrequencyCounter++;
+						break;
 					}
 				}
 			}
 			documentFrquencyMapOfTerms.put(term, new Integer(documentFrequencyCounter));
-			termFrequencyMapOfTerms.put(term, new Integer(termFrequencyCounter));
 		});
 	}
 
@@ -264,15 +264,15 @@ public class SearchAlgorithm {
 		});
 	}
 
-	public static void createPrimaryDocumentVectors() {
+	public static void createPrimaryDocumentVectors() throws FileNotFoundException {
 
-		termFrequencyMapOfTerms.forEach((term, value) -> {
-			termFrequencyList.add(value);
-		});
-
+		PrintWriter wr2 = new PrintWriter(new File(System.getProperty("user.dir") + "/idf.txt"));
 		idfMapOfTerms.forEach((term, value) -> {
 			idfList.add(value);
+			wr2.write(term + ": " + value + "\n");
 		});
+		wr2.flush();
+		wr2.close();
 
 		for (Entry<Integer, ArrayList<String>> document : documentMap.entrySet()) {
 			LinkedHashMap<Integer, Integer> vectorMap = new LinkedHashMap<Integer, Integer>();
@@ -287,21 +287,66 @@ public class SearchAlgorithm {
 			}
 			documentPrimaryVectorMap.put(document.getKey(), vectorMap);
 		}
-
+		PrintWriter wr3 = new PrintWriter(new File(System.getProperty("user.dir") + "/prime.txt"));
+		documentPrimaryVectorMap.forEach((key, value) -> {
+		    String name = movieNameMap.get(key);
+			value.forEach((id, score) -> {
+				wr3.write("("+name+", ");
+				wr3.write(uniqueTermList.get(id)+")"+" : "+score+"\n");
+			});
+		});
+		wr3.flush();
+		wr3.close();
 	}
 
-	public static void createFinalDocumentVectors() {
-
+	public static void createFinalDocumentVectors() throws FileNotFoundException {
+		
+		LinkedHashMap<Integer, LinkedHashMap<Integer, Double>> interMap = new LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>();
 		for (Entry<Integer, LinkedHashMap<Integer, Integer>> entry : documentPrimaryVectorMap.entrySet()) {
 			finalVectorList = new LinkedHashMap<Integer, Double>();
 			LinkedHashMap<Integer, Integer> vectorMap = entry.getValue();
+			double normal = euclidianNormalization(vectorMap);
+			LinkedHashMap<Integer, Double> map = new LinkedHashMap<Integer, Double>();
 			vectorMap.forEach((id, value) -> {
-				double x = value * idfList.get(id);
-				double y = x / termFrequencyList.get(id);
+				double x = value / normal;
+				map.put(id, x);
+				double y = x * idfList.get(id);
 				finalVectorList.put(id, y);
 			});
 			documentFinalVectorMap.put(entry.getKey(), finalVectorList);
+			interMap.put(entry.getKey(), map);
 		}
+		
+		PrintWriter wr3 = new PrintWriter(new File(System.getProperty("user.dir") + "/Tf.txt"));
+		interMap.forEach((key, value) -> {
+		    String name = movieNameMap.get(key);
+			value.forEach((id, score) -> {
+				wr3.write("("+name+", ");
+				wr3.write(uniqueTermList.get(id)+")"+" : "+score+"\n");
+			});
+		});
+		wr3.flush();
+		wr3.close();
+		
+		PrintWriter wr4 = new PrintWriter(new File(System.getProperty("user.dir") + "/final.txt"));
+		documentFinalVectorMap.forEach((key, value) -> {
+		    String name = movieNameMap.get(key);
+			value.forEach((id, score) -> {
+				wr4.write("("+name+", ");
+				wr4.write(uniqueTermList.get(id)+")"+" : "+score+"\n");
+			});
+		});
+		wr4.flush();
+		wr4.close();
+	}
+
+	public static double euclidianNormalization(LinkedHashMap<Integer, Integer> vectorMap) {
+
+		int sqr = 0;
+		for (Entry<Integer, Integer> entry : vectorMap.entrySet()) {
+			sqr = sqr + (entry.getValue() * entry.getValue());
+		}
+		return Math.sqrt(sqr);
 	}
 
 	public static boolean checkStopWord(String term) {

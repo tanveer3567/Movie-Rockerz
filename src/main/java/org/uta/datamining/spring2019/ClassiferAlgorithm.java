@@ -3,13 +3,11 @@ package org.uta.datamining.spring2019;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -47,15 +45,16 @@ public class ClassiferAlgorithm {
 	static LinkedHashMap<Integer, ArrayList<String>> documentMap = new LinkedHashMap<Integer, ArrayList<String>>();
 	static LinkedHashSet<String> hashSet = new LinkedHashSet<String>();
 	static ArrayList<String> nameSet = null;
-	private static LinkedHashMap<Integer, List<String>> tagsMap = new LinkedHashMap<Integer, List<String>>();
+	static LinkedHashMap<Integer, List<String>> tagsMap = new LinkedHashMap<Integer, List<String>>();
 	static TreeSet<String> genreSet = new TreeSet<String>();
 	static TreeMap<String, List<String>> genreMap = new TreeMap<String, List<String>>();
 	static LinkedHashMap<ProbabilityOfTermGivenGenre, Double> score = new LinkedHashMap<ProbabilityOfTermGivenGenre, Double>();
 	static LinkedHashMap<String, Double> probabilityOfGenre = new LinkedHashMap<String, Double>();
+	static Integer fCount = 4;
 
 	public static void preload() {
 
-		String moviesDataSet = "/src/tmdb_5000_movies.csv";
+		String moviesDataSet = "//tmdb_5000_movies.csv";
 		try {
 			String property = System.getProperty("user.dir");
 			FileReader filereader = new FileReader(new File(property + moviesDataSet));
@@ -90,29 +89,33 @@ public class ClassiferAlgorithm {
 			});
 
 			documentMap.forEach((id, termList) -> {
-				for (int i = 0; i < termList.size(); i++) {
-					if (checkStopWord(termList.get(i))) {
-						termList.remove(i);
-						i--;
-					} else {
-						String removePunctuations = removePunctuations(termList.get(i));
-						if (Objects.nonNull(removePunctuations))
-							termList.set(i, removePunctuations);
-						hashSet.add(termList.get(i));
+				if (Objects.nonNull(termList)) {
+					for (int i = 0; i < termList.size(); i++) {
+						if (checkStopWord(termList.get(i))) {
+							termList.remove(i);
+							i--;
+						} else {
+							String removePunctuations = removePunctuations(termList.get(i));
+							if (Objects.nonNull(removePunctuations))
+								termList.set(i, removePunctuations);
+							hashSet.add(termList.get(i));
+						}
 					}
 				}
 			});
 
 			documentMap.forEach((id, terms) -> {
-				genreSet.forEach(genre -> {
-					if (tagsMap.get(id).contains(genre)) {
-						if (genreMap.containsKey(genre)) {
-							genreMap.get(genre).addAll(terms);
-						} else {
-							genreMap.put(genre, terms);
+				if (Objects.nonNull(terms)) {
+					genreSet.forEach(genre -> {
+						if (tagsMap.get(id).contains(genre)) {
+							if (genreMap.containsKey(genre)) {
+								genreMap.get(genre).addAll(terms);
+							} else {
+								genreMap.put(genre, terms);
+							}
 						}
-					}
-				});
+					});
+				}
 			});
 
 			genreSet.forEach(genre -> {
@@ -151,11 +154,10 @@ public class ClassiferAlgorithm {
 		}
 	}
 
-	public static LinkedList<String> classify(String query) {
+	public static FullClassiferResult classify(String query) {
 
 		LinkedHashMap<String, Double> finalScoreMap = new LinkedHashMap<String, Double>();
 		LinkedHashMap<String, Double> reverseSortedMap = new LinkedHashMap<String, Double>();
-		LinkedList<String> finalList = new LinkedList<String>();
 		if (StringUtils.isNoneBlank(query)) {
 			String[] split = query.split(" ");
 			for (String tempTerm : split) {
@@ -187,15 +189,10 @@ public class ClassiferAlgorithm {
 				}
 				finalScoreMap.put(genre, finalScore);
 			});
-
 			finalScoreMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
 					.forEachOrdered(x -> reverseSortedMap.put(x.getKey(), x.getValue()));
-
-			reverseSortedMap.forEach((key, value) -> {
-				finalList.add(key);
-			});
 		}
-		return finalList;
+		return new FullClassiferResult(reverseSortedMap, probabilityOfGenre, score);
 	}
 
 	private static List<String> readTags(String[] nextRecord, int val)
@@ -266,4 +263,5 @@ public class ClassiferAlgorithm {
 	public static String stem(String word) {
 		return new PorterStemmer().stem(word);
 	}
+
 }

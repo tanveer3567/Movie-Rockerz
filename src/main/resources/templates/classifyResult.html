@@ -105,21 +105,28 @@ h1 {
 		<div class="row">
 			<h4>Predicted Genres for "</h4>
 			<h4 th:text="${query}"></h4>
-			<h4>" are</h4>
+			<h4>" are&nbsp;</h4>
+			<h4 th:text=${genre1}></h4>
+			<h4>,&nbsp;</h4>
+			<h4 th:text=${genre2}></h4>
+			<h4>,&nbsp;</h4>
+			<h4 th:text=${genre3}></h4>
+			<h4>,&nbsp;</h4>
+			<h4 th:text=${genre4}></h4>
 		</div>
 		<br />
 		<div class="row">
-			<div class="col-md-1"></div>
-			<div class="col-md-6">
-				<h5>
-					<span>1.</span> <span th:text="${genre0}"></span>
-				</h5>
-				<h5>
-					<span>2. </span> <span th:text="${genre1}"></span>
-				</h5>
-				<h5>
-					<span>3. </span> <span th:text="${genre2}"></span>
-				</h5>
+			<div class="col-md-2">
+				<h5>Full results</h5>
+				<a href="/movierockerz/priorProbabilities">Prior probabilities</a><a
+					href="/movierockerz/probabilityOfTermGivenGenre"> Probability
+					of Term given Genre</a> <a href="/movierockerz/evaluation">Evaluation</a>
+			</div>
+			<div class="col-md-5">
+				<br />
+				<div th:each="genre : ${result}">
+					<h6 th:text="${genre}"></h6>
+				</div>
 			</div>
 			<div class="col-md-3"></div>
 		</div>
