@@ -342,26 +342,171 @@ The project provides a text box for input from the user. Once the classify butto
 
 ### Phase 1 (Preload): This is done only once i.e. at the time of application boot up.
 
-1. Divide the data set into three parts training, development and testing i.e. 60% training, 20% development, 20% testing.
-
-2. Now, consider name, overview and tags of all the movies from the data-set are fetched.
+2. Name, overview and tags of all the movies from the data-set are fetched.
 
 3. Then name, overview and tags of each movie are concatenated as one string and the entire string is split into each individual word and stored in a separate array for each movie and then the array is mapped to corresponding movie id.
+
+```java
+String moviesDataSet = "/tmdb_5000_movies.csv";
+		try {
+			String property = System.getProperty("user.dir");
+			FileReader filereader = new FileReader(new File(property + moviesDataSet));
+			CSVReader csvReader = new CSVReader(filereader);
+			String[] nextRecord;
+			int k = 0;
+			while ((nextRecord = csvReader.readNext()) != null) {
+				if (k > 0) {
+					List<String> genre = readTags(nextRecord, 1);
+					int record = Integer.parseInt(nextRecord[3]);
+					String name = nextRecord[6];
+					String[] nameSplit = name.toLowerCase().split(" ");
+					readName(nameSplit);
+					String overview = nextRecord[7];
+					String[] split = overview.toLowerCase().split(" ");
+					for (int i = 0; i < split.length; i++) {
+						split[i] = stem(split[i]);
+					}
+					List<String> tags = readTags(nextRecord, 4);
+					docTerms = Arrays.asList(split);
+					ArrayList<String> tempList = new ArrayList<String>(docTerms);
+					tempList.addAll(tags);
+					tempList.addAll(nameSet);
+					documentMap.put(record, tempList);
+					tagsMap.put(record, genre);
+				}
+				k++;
+			}
+
+			tagsMap.forEach((id, value) -> {
+				value.forEach(genre -> genreSet.add(genre));
+			});
+```
 
 4. Then we remove stop words from each array by iterating over all the arrays.
 
 5. Then we use porter’s steaming algorithm to get the steam form of each word by iterating over all the words in all the arrays.
 
-6. When the retrieve genres of each movie and store them in each array. Then map the genre arrays to corresponding movieId.
+```java
+	documentMap.forEach((id, termList) -> {
+				if (Objects.nonNull(termList)) {
+					for (int i = 0; i < termList.size(); i++) {
+						if (checkStopWord(termList.get(i))) {
+							termList.remove(i);
+							i--;
+						} else {
+							String removePunctuations = removePunctuations(termList.get(i));
+							if (Objects.nonNull(removePunctuations))
+								termList.set(i, removePunctuations);
+							hashSet.add(termList.get(i));
+						}
+					}
+				}
+			});
+	public static boolean checkStopWord(String term) {
+
+		for (int i = 0; i < stopWords.length; i++) {
+			if (term.equalsIgnoreCase(stopWords[i]))
+				return true;
+		}
+		return false;
+	}
+
+	public static String removePunctuations(String term) {
+
+		boolean isModified = false;
+		String[] punctuationMarks = { ".", ",", "?", ":", ";", "\'", "\"", "`", "-", "_", "{", "}", "[", "]", "(", ")",
+				"'", "@", "#", "$", "%", "^", "&", "*" };
+		String newTerm = null;
+		for (int i = 0; i < punctuationMarks.length; i++) {
+			if (term.contains(punctuationMarks[i])) {
+				newTerm = "";
+				String mark = punctuationMarks[i];
+				List<String> tempTerm = Arrays.asList(term.split(""));
+				List<String> tempList = new ArrayList<String>(tempTerm);
+				for (int j = 0; j < tempList.size(); j++) {
+					if (tempList.get(j).equalsIgnoreCase(mark)) {
+						tempList.remove(j);
+					}
+				}
+				for (String t : tempList) {
+					newTerm += t;
+				}
+				term = newTerm;
+				isModified = true;
+			}
+		}
+		return isModified ? term : null;
+	}
+
+	public static String stem(String word) {
+		return new PorterStemmer().stem(word);
+	}
+```
+
+6. Now, we retrieve genres of each movie and store them in each array. Then map the genre arrays to corresponding movieId.
 
 7. We also get all the genres from the data-set and store them in a set.
 
+```java
+	documentMap.forEach((id, terms) -> {
+				if (Objects.nonNull(terms)) {
+					genreSet.forEach(genre -> {
+						if (tagsMap.get(id).contains(genre)) {
+							if (genreMap.containsKey(genre)) {
+								genreMap.get(genre).addAll(terms);
+							} else {
+								genreMap.put(genre, terms);
+							}
+						}
+					});
+				}
+			});
+```
+
 8. We not create a map containing genre as the key and list of terms appeared in the genre from the data-set.
 
-10. Then we calculate the probability of genre by using this formula i.e.
+10. Then we calculate the probability of genre.
+
+```java
+	genreSet.forEach(genre -> {
+				List<Integer> idList = new ArrayList<Integer>();
+				tagsMap.forEach((id, tagList) -> {
+					if (tagList.contains(genre)) {
+						idList.add(id);
+					}
+				});
+				probabilityOfGenre.put(genre, (double) idList.size() / documentMap.size());
+			});
+```
 
 11.  Now we calculate the term frequency of the each term in the data-set and then calculate probability of term give genre i.e P( T | G )using conditional probability formula (Note we apply smoothing here i.e. increment term frequency counter by 1 for each term).
 
+```java
+	LinkedHashMap<ProbabilityOfTermGivenGenre, Integer> termCounterMap = new LinkedHashMap<ProbabilityOfTermGivenGenre, Integer>();
+			hashSet.forEach(term -> {
+				for (Entry<String, List<String>> entry : genreMap.entrySet()) {
+					int counter = 0;
+					for (String localTerm : entry.getValue()) {
+						if (term.equalsIgnoreCase(localTerm)) {
+							counter++;
+						}
+					}
+					termCounterMap.put(new ProbabilityOfTermGivenGenre(term, entry.getKey()), counter);
+				}
+			});
+```
+
 12. Now we store P( T | G) values in a map.
+
+```java
+	termCounterMap.forEach((key, value) -> {
+				int a = value + 1;
+				int b = genreMap.get(key.getGenre()).size();
+				int c = hashSet.size();
+				double result = (double) a / (double) (b + c);
+				score.put(new ProbabilityOfTermGivenGenre(key.getTerm(), key.getGenre()), result);
+			});
+			csvReader.close();
+```
 
 
