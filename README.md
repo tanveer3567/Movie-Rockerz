@@ -145,7 +145,7 @@ The project provides a search box for input from the user. Once the search butto
 6. Then we give vector representation of each movie by calculating tf – idf value of each term corresponding to that movie.
 
 ```java
-public static void createPrimaryDocumentVectors() throws FileNotFoundException {
+	public static void createPrimaryDocumentVectors() throws FileNotFoundException {
 
 		PrintWriter wr2 = new PrintWriter(new File(System.getProperty("user.dir") + "/idf.txt"));
 		idfMapOfTerms.forEach((term, value) -> {
@@ -182,7 +182,7 @@ public static void createPrimaryDocumentVectors() throws FileNotFoundException {
 
 	public static void createFinalDocumentVectors() throws FileNotFoundException {
 
-		LinkedHashMap<Integer, LinkedHashMap<Integer, Double>> interMap = new LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>();
+		LinkedHashMap<Integer, LinkedHashMap<Integer, Double>> interMap = new LinkedHashMap<Integer, LinkedHashMap<Integer, 	                 Double>>();
 		for (Entry<Integer, LinkedHashMap<Integer, Integer>> entry : documentPrimaryVectorMap.entrySet()) {
 			finalVectorList = new LinkedHashMap<Integer, Double>();
 			LinkedHashMap<Integer, Integer> vectorMap = entry.getValue();
@@ -230,3 +230,100 @@ public static void createPrimaryDocumentVectors() throws FileNotFoundException {
 		return Math.sqrt(sqr);
 	}
 ```
+
+### Phase 2 (Search): This is done for each search request.
+
+1. We now search query into array of terms.
+
+```java
+	String[] split2 = query.toLowerCase().split(" ");
+		for (int i = 0; i < split2.length; i++) {
+			split2[i] = stem(split2[i]);
+		}
+```
+
+2. Then we remove stop words from array by iterating it.
+
+3. Then we use porter’s steaming algorithm to get the steam form of each word by iterating over all the words in all the arrays
+
+```java
+	for (int i = 0; i < splitList.size(); i++) {
+			if (checkStopWord(splitList.get(i))) {
+				splitList.remove(i);
+				i--;
+			} else {
+				String removePunctuations = removePunctuations(split.get(i));
+				if (Objects.nonNull(removePunctuations))
+					splitList.set(i, removePunctuations);
+				queryHashSet.add(splitList.get(i));
+				queryList.add(splitList.get(i));
+			}
+		}
+```
+4. Now, we calculatetf of each term in the array.
+
+```java
+	queryHashSet.forEach(queryTerm -> {
+			int queryCounter = 0;
+			for (int i = 0; i < queryList.size(); i++) {
+				if (queryTerm.equalsIgnoreCase(queryList.get(i)))
+					queryCounter++;
+			}
+			queryTermFrequencyMap.put(queryTerm, queryCounter);
+		});
+```
+4. Then we get the idf values from the phase 1 for each term in the search query.
+
+5. Then we give vector representation of the search query by calculating tf-idf score.
+
+```java
+	queryTermFrequencyMap.forEach((queryTerm, frequency) -> {
+			if (uniqueTermList.contains(queryTerm)) {
+				queryFinalVectorMap.put(uniqueTermList.indexOf(queryTerm),
+						frequency * idfList.get(uniqueTermList.indexOf(queryTerm)));
+			}
+		});
+```
+
+6. Then we compute the cosine similarity of the search query with respect to each document i.e. movie (name and overview).
+
+7. We store all the non-zero cosine similarity scores and rank them in descending order and show them to the user.
+
+```java
+
+	Comparator<CustomMap> scoreComparator = (e1, e2) -> {
+			if (e1.getScore() > e2.getScore()) {
+				return -1;
+			} else {
+				return 1;
+			}
+		};
+	TreeMap<CustomMap, String> treeMap = new TreeMap<CustomMap, String>(scoreComparator);
+	double y = 0;
+	for (Entry<Integer, Double> entry : queryFinalVectorMap.entrySet()) {
+		y += entry.getValue() * entry.getValue();
+	}
+	for (Entry<Integer, LinkedHashMap<Integer, Double>> entry : documentFinalVectorMap.entrySet()) {
+		double x = 0;
+		double val = 0;
+		double cosineSimilarity = 0;
+		for (Entry<Integer, Double> entryInner : entry.getValue().entrySet()) {
+			x += entryInner.getValue() * entryInner.getValue();
+		}
+		for (Entry<Integer, Double> entryInner : queryFinalVectorMap.entrySet()) {
+			if (entry.getValue().containsKey(entryInner.getKey())) {
+				Double double1 = entry.getValue().get(entryInner.getKey());
+				Double double2 = entryInner.getValue();
+				val += double1 * double2;
+				}
+		}
+		if (val > 0) {
+			cosineSimilarity = val / (Math.sqrt(x) * Math.sqrt(y));
+		}
+		treeMap.put(
+				new CustomMap(entry.getKey(), cosineSimilarity, movieNameMap.get(entry.getKey()),
+						movieUrlMap.get(entry.getKey()), tagsMap.get(entry.getKey())),
+				overviewMap.get(entry.getKey()));
+	}
+```
+
