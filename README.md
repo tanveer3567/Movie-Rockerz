@@ -233,7 +233,7 @@ The project provides a search box for input from the user. Once the search butto
 
 ### Phase 2 (Search): This is done for each search request.
 
-1. We now search query into array of terms.
+1. We now convert search query into array of terms.
 
 ```java
 	String[] split2 = query.toLowerCase().split(" ");
@@ -260,7 +260,7 @@ The project provides a search box for input from the user. Once the search butto
 			}
 		}
 ```
-4. Now, we calculatetf of each term in the array.
+4. Now, we calculate tf of each term in the array.
 
 ```java
 	queryHashSet.forEach(queryTerm -> {
@@ -333,10 +333,10 @@ The project provides a search box for input from the user. Once the search butto
 
 Columns in the data set used for classifier feature are
 
-	1. Name of the movie.
-	2. Overview of the movie.
-	3. Tags of the movie.
- 	4. Genre of the movie.
+  1. Name of the movie.
+  2. Overview of the movie.
+  3. Tags of the movie.
+  4. Genre of the movie.
 
 The project provides a text box for input from the user. Once the classify button is clicked classifier algorithm is executed on the input data and related results will be shown to the user. The classifier algorithm is implemented in two phases.
 
@@ -509,4 +509,59 @@ String moviesDataSet = "/tmdb_5000_movies.csv";
 			csvReader.close();
 ```
 
+### Phase 2 (Classify): This is done for each classify request.
 
+1. We now convert search query into array of terms.
+
+```java
+	String[] split = query.split(" ");
+	for (String tempTerm : split) {
+			tempTerm = stem(tempTerm);
+	}
+```
+
+2. Then we remove stop words from each array by iterating over it.
+
+3. Then we use porter’s steaming algorithm to get the stem form of each word by iterating over all the words in the array.
+
+``java
+	for (int i = 0; i < splitList.size(); i++) {
+		if (checkStopWord(splitList.get(i))) {
+			splitList.remove(i);
+			i--;
+		} else {
+			String removePunctuations = removePunctuations(split[i]);
+			if (Objects.nonNull(removePunctuations))
+				splitList.set(i, removePunctuations);
+			queryList.add(splitList.get(i));
+		}
+	}
+```
+
+4. We now calculate the term frequency of each term and in the classify query.
+
+5. Then we get the P(T | G) values from the phase 1 for each term in the classify query.
+
+6. We now calculate P(G | T) value for each term using Bayer's Rule i.e.    
+
+7. We know add score for each term in the classify query. Repeat, step 5, 6 for all genres.
+
+8. We store now store top 3 scores and display the corresponding genres to the user.
+
+```java
+	probabilityOfGenre.forEach((genre, probability) -> {
+		Double finalScore = probability;
+		for (String qTerm : queryList) {
+		for (Entry<ProbabilityOfTermGivenGenre, Double> entry : score.entrySet()) {
+				if (entry.getKey().getTerm().equalsIgnoreCase(qTerm)
+						&& entry.getKey().getGenre().equalsIgnoreCase(genre)) {
+					finalScore *= entry.getValue();
+					break;
+				}
+			}
+		}
+		finalScoreMap.put(genre, finalScore);
+	});
+	finalScoreMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+			.forEachOrdered(x -> reverseSortedMap.put(x.getKey(), x.getValue()));
+```
