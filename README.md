@@ -56,6 +56,22 @@ String moviesDataSet = "/tmdb_5000_movies.csv";
 
 4. Then we use porter’s steaming algorithm to get the steam form of each word by iterating over all the words in all the arrays.
 
+```java
+documentMap.forEach((id, termList) -> {
+				for (int i = 0; i < termList.size(); i++) {
+					if (checkStopWord(termList.get(i))) {
+						termList.remove(i);
+						i--;
+					} else {
+						String removePunctuations = removePunctuations(termList.get(i));
+						if (Objects.nonNull(removePunctuations))
+							termList.set(i, removePunctuations);
+						hashSet.add(termList.get(i));
+					}
+				}
+			});
+```
+
 5. Then we form a list of all the unique terms and determine tf and idf values of these unique words.
 
 6. Then we give vector representation of each movie by calculating tf – idf value of each term corresponding to that movie.
