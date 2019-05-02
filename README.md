@@ -327,3 +327,41 @@ The project provides a search box for input from the user. Once the search butto
 	}
 ```
 
+## Developing basic classifier using Navie Bayes Classifier:
+
+### Data set: https://www.kaggle.com/tmdb/tmdb-movie-metadata
+
+Columns in the data set used for classifier feature are
+
+	1. Name of the movie.
+	2. Overview of the movie.
+	3. Tags of the movie.
+ 	4. Genre of the movie.
+
+The project provides a text box for input from the user. Once the classify button is clicked classifier algorithm is executed on the input data and related results will be shown to the user. The classifier algorithm is implemented in two phases.
+
+### Phase 1 (Preload): This is done only once i.e. at the time of application boot up.
+
+1. Divide the data set into three parts training, development and testing i.e. 60% training, 20% development, 20% testing.
+
+2. Now, consider name, overview and tags of all the movies from the data-set are fetched.
+
+3. Then name, overview and tags of each movie are concatenated as one string and the entire string is split into each individual word and stored in a separate array for each movie and then the array is mapped to corresponding movie id.
+
+4. Then we remove stop words from each array by iterating over all the arrays.
+
+5. Then we use porter’s steaming algorithm to get the steam form of each word by iterating over all the words in all the arrays.
+
+6. When the retrieve genres of each movie and store them in each array. Then map the genre arrays to corresponding movieId.
+
+7. We also get all the genres from the data-set and store them in a set.
+
+8. We not create a map containing genre as the key and list of terms appeared in the genre from the data-set.
+
+10. Then we calculate the probability of genre by using this formula i.e.
+
+11.  Now we calculate the term frequency of the each term in the data-set and then calculate probability of term give genre i.e P( T | G )using conditional probability formula (Note we apply smoothing here i.e. increment term frequency counter by 1 for each term).
+
+12. Now we store P( T | G) values in a map.
+
+
