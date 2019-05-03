@@ -754,3 +754,28 @@ The project provides a search box for input from the user. Once the search butto
 ```
 
 4. Then movies with highest cosine similarity are shown as recommended movies along with the details of the movies which is clicked        earlier.
+
+
+## Technology stack
+
+Java 1.8, Spring boot 4, Thymleaf, Bootstrap, Apache Maven, Apache OpenNlp, AWS EC2, AWS S3, Spring tool suit 4
+
+## References
+
+### Search
+
+1. https://nlp.stanford.edu/IR-book/pdf/06vect.pdf
+2. https://kb.yoast.com/kb/list-stop-words/
+
+## Classifier
+
+1. https://nlp.stanford.edu/IR-book/pdf/13bayes.pdf
+2. https://www.3pillarglobal.com/insights/document-classification-using-multinomial-naive-bayes-classifier
+3. https://kb.yoast.com/kb/list-stop-words/
+
+## Recommender
+
+1. http://infolab.stanford.edu/~ullman/mmds/ch9.pdf
+2. https://kb.yoast.com/kb/list-stop-words/
+
+## [Click](https://shaiktanveerahmed1.wixsite.com/homepage/datamining) here to read basic concepts required for building this project
