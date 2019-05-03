@@ -340,7 +340,7 @@ Columns in the data set used for classifier feature are
 
 The project provides a text box for input from the user. Once the classify button is clicked classifier algorithm is executed on the input data and related results will be shown to the user. The classifier algorithm is implemented in two phases.
 
-### Phase 1 (Preload): This is done only once i.e. at the time of application boot up.
+### Phase 1 (Training): This is done only once i.e. at the time of application boot up.
 
 2. Name, overview and tags of all the movies from the data-set are fetched.
 
@@ -714,3 +714,43 @@ String moviesDataSet = "/tmdb_5000_movies.csv";
 ```
 
 8. We get highest F1- measure for predicting 4 genre. So, our final classifier will predict 4 genre.
+
+## Developing basic content based recommender system
+
+### Data set: https://www.kaggle.com/tmdb/tmdb-movie-metadata
+
+Columns in the data set used for recommendation feature are
+
+  1. Name of the movie.
+  2. Overview of the movie.
+
+The project provides a search box for input from the user. Once the search button is clicked search algorithm is run on the input data and related results will be shown to the user. Once the user clicks on a particular movie then
+
+1. User will be able to see the details of the movie like name, genre, budget, revenue, tags, runtime, release date, popularity etc.
+
+2. Then after that upto 20 movies are recommended to the user which are similar to the movie on whicj he click earlier.
+
+3. How this happens is the description of the movie on which is clicked is fed to search algorith as a query
+
+```java
+	public ModelAndView getMovieDetails(@RequestParam(name = "movieId", required = true) String movieId)
+			throws FileNotFoundException {
+
+		MovieDetails movieDetails = MovieDetailsService.getMovieDetails(Integer.parseInt(movieId));
+		LinkedHashMap<CustomMap, String> search = SearchAlgorithm.search(movieDetails.getOverview());
+		LinkedHashMap<CustomMap, String> searchResult = new LinkedHashMap<CustomMap, String>();
+		int i = 0;
+		for (Entry<CustomMap, String> entry : search.entrySet()) {
+			if (i < 21 && i > 0) {
+				searchResult.put(entry.getKey(), entry.getValue());
+			}
+			i++;
+		}
+		ModelAndView model = new ModelAndView("recommender");
+		model.addObject("result", movieDetails);
+		model.addObject("searchResult", searchResult);
+		return model;
+	}
+```
+
+4. Then movies with highest cosine similarity are shown as recommended movies along with the details of the movies which is clicked        earlier.
