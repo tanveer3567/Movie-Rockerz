@@ -565,3 +565,152 @@ String moviesDataSet = "/tmdb_5000_movies.csv";
 	finalScoreMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
 			.forEachOrdered(x -> reverseSortedMap.put(x.getKey(), x.getValue()));
 ```
+
+### Classifier Evaluation:
+
+1. After creating document to terms map we now split the dataset into 60% training, 20% development, 20% testing.
+
+```java
+	public static void documentRandomizer() {
+
+		Random random = new Random();
+		List<Integer> keys = new ArrayList<Integer>(documentMap.keySet());
+		int size = documentMap.size();
+		while (documentMap.size() > size * 0.6) {
+			Integer movieId = keys.get(random.nextInt(keys.size()));
+			ArrayList<String> termList = documentMap.remove(movieId);
+			if (Objects.nonNull(termList)) {
+				trainingDocMap.put(movieId, termList);
+			}
+		}
+		List<Integer> tempKeys = new ArrayList<Integer>(documentMap.keySet());
+		size = documentMap.size();
+		while (documentMap.size() > size * 0.5) {
+			Integer movieId = keys.get(random.nextInt(tempKeys.size()));
+			ArrayList<String> termList = documentMap.remove(movieId);
+			if (Objects.nonNull(termList)) {
+				developmentDocMap.put(movieId, termList);
+			}
+		}
+	}	
+```
+
+2. Now, we apply phase 1 of the classifier and train the classifier.
+
+3. Then we apply phase 2 of the classifer and classify each movie's description in the development and predict 1 genre.
+
+5. Then we calculate F1 - measure for predicting 1 genre and tabulate the results.
+
+4. We repeat step 3 for precting 2 genres, 3 genres, ... 22 genres.
+
+```java
+	public static void evaluate() {
+
+		developmentDocMap.forEach((id, termList) -> {
+			if (Objects.nonNull(termList)) {
+				for (int i = 0; i < termList.size(); i++) {
+					if (checkStopWord(termList.get(i))) {
+						termList.remove(i);
+						i--;
+					} else {
+						String removePunctuations = removePunctuations(termList.get(i));
+						if (Objects.nonNull(removePunctuations))
+							termList.set(i, removePunctuations);
+					}
+				}
+			}
+		});
+
+		developmentDocMap.forEach((key, value) -> {
+			String testString = StringUtils.join(value, " ");
+			evaluateMap.put(key, classify(testString));
+		});
+
+		for (int i = 1; i <= genreSet.size(); i++) {
+			evaluationForClassifer(evaluateMap,i, false);
+		}
+
+		LinkedHashMap<Integer, Double> avgFmeasureMap = new LinkedHashMap<Integer, Double>();
+		for (int i = 1; i <= genreSet.size(); i++) {
+			int size = 0;
+			double fSum = 0;
+			for (Statistic statistic : staticList) {
+				if (statistic.getGenreCount() == i) {
+					fSum += statistic.getfMeasure();
+					size++;
+				}
+			}
+			avgFmeasureMap.put(i, (double) fSum / (double) size);
+		}
+
+		avgFmeasureMap.forEach((key, value) -> {
+			System.out.println(key + ": " + value);
+		});
+		fCount = Collections.max(avgFmeasureMap.entrySet(), Comparator.comparingDouble(Map.Entry::getValue)).getKey();
+
+		documentMap.forEach((id, termList) -> {
+			if (Objects.nonNull(termList)) {
+				for (int i = 0; i < termList.size(); i++) {
+					if (checkStopWord(termList.get(i))) {
+						termList.remove(i);
+						i--;
+					} else {
+						String removePunctuations = removePunctuations(termList.get(i));
+						if (Objects.nonNull(removePunctuations))
+							termList.set(i, removePunctuations);
+					}
+				}
+			}
+		});
+
+		documentMap.forEach((key, value) -> {
+			String testString = StringUtils.join(value, " ");
+			testMap.put(key, classify(testString));
+		});
+
+		evaluationForClassifer(testMap, fCount, true);
+
+		double fSum = 0;
+		for (Statistic statistic : testList) {
+			fSum += statistic.getfMeasure();
+		}
+
+		System.out.println((double) fSum / (double) testList.size());
+	}
+```
+
+6. Then we calculate F1 - measure for predicting 2 genre, 3 genre,.... 22 genre anf tabulate the results.
+
+7. We run 5 simulating of step 3 to 6 and get highest F1-meaure and its corresponding no of genres.
+
+```java
+	public static void evaluationForClassifer(LinkedHashMap<Integer, LinkedHashMap<String, Double>> map, int genreCount, boolean 	         test) {
+
+		map.forEach((movieId, genreScore) -> {
+			List<String> genreList = tagsMap.get(movieId);
+			List<String> keys = new ArrayList<String>(genreScore.keySet());
+			int trueP = 0;
+			for (int i = 0; i < genreCount; i++) {
+				if (Objects.nonNull(genreList) && !genreList.isEmpty() && Objects.nonNull(keys) && !keys.isEmpty()) {
+					if (genreList.contains(keys.get(i))) {
+						++trueP;
+					}
+				}
+			}
+			double precision = (double) trueP / (double) genreCount;
+			double recall = (double) trueP / (double) genreList.size();
+			double fMeasure = 0;
+			if (precision > 0 && recall > 0) {
+				fMeasure = (2 * precision * recall) / (precision + recall);
+			}
+			if (test) {
+				testList.add(new Statistic(genreCount, movieId, genreScore, precision, recall, fMeasure));
+			} else {
+				staticList.add(new Statistic(genreCount, movieId, genreScore, precision, recall, fMeasure));
+			}
+
+		});
+	}
+```
+
+8. We get highest F1- measure for predicting 4 genre. So, our final classifier will predict 4 genre.
