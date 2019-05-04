@@ -819,4 +819,10 @@ Java 1.8, Spring boot 4, Thymleaf, Bootstrap, Apache Maven, Apache OpenNlp, AWS 
 1. http://infolab.stanford.edu/~ullman/mmds/ch9.pdf
 2. https://kb.yoast.com/kb/list-stop-words/
 
-## [Click](https://shaiktanveerahmed1.wixsite.com/homepage/datamining) here to read basic concepts required for building this project
+## Blogs:
+
+1. [Search](https://shaiktanveerahmed1.wixsite.com/homepage/search-feature)
+2. [Classifer](https://shaiktanveerahmed1.wixsite.com/homepage/classifier-feature)
+3. [Recommender](https://shaiktanveerahmed1.wixsite.com/homepage/recommender-feayure)
+
+## [Click](https://shaiktanveerahmed1.wixsite.com/homepage/datamining) for more details about the project.
