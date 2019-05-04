@@ -342,9 +342,9 @@ The project provides a text box for input from the user. Once the classify butto
 
 ### Phase 1 (Training): This is done only once i.e. at the time of application boot up.
 
-2. Name, overview and tags of all the movies from the data-set are fetched.
+1. Name, overview and tags of all the movies from the data-set are fetched.
 
-3. Then name, overview and tags of each movie are concatenated as one string and the entire string is split into each individual word and stored in a separate array for each movie and then the array is mapped to corresponding movie id.
+2. Then name, overview and tags of each movie are concatenated as one string and the entire string is split into each individual word and stored in a separate array for each movie and then the array is mapped to corresponding movie id.
 
 ```java
 String moviesDataSet = "/tmdb_5000_movies.csv";
@@ -382,9 +382,9 @@ String moviesDataSet = "/tmdb_5000_movies.csv";
 			});
 ```
 
-4. Then we remove stop words from each array by iterating over all the arrays.
+3. Then we remove stop words from each array by iterating over all the arrays.
 
-5. Then we use porter’s steaming algorithm to get the steam form of each word by iterating over all the words in all the arrays.
+4. Then we use porter’s steaming algorithm to get the steam form of each word by iterating over all the words in all the arrays.
 
 ```java
 	documentMap.forEach((id, termList) -> {
@@ -443,9 +443,9 @@ String moviesDataSet = "/tmdb_5000_movies.csv";
 	}
 ```
 
-6. Now, we retrieve genres of each movie and store them in each array. Then map the genre arrays to corresponding movieId.
+5. Now, we retrieve genres of each movie and store them in each array. Then map the genre arrays to corresponding movieId.
 
-7. We also get all the genres from the data-set and store them in a set.
+6. We also get all the genres from the data-set and store them in a set.
 
 ```java
 	documentMap.forEach((id, terms) -> {
@@ -463,9 +463,9 @@ String moviesDataSet = "/tmdb_5000_movies.csv";
 			});
 ```
 
-8. We not create a map containing genre as the key and list of terms appeared in the genre from the data-set.
+7. We not create a map containing genre as the key and list of terms appeared in the genre from the data-set.
 
-10. Then we calculate the probability of genre.
+8. Then we calculate the probability of genre.
 
 ```java
 	genreSet.forEach(genre -> {
@@ -479,7 +479,7 @@ String moviesDataSet = "/tmdb_5000_movies.csv";
 			});
 ```
 
-11.  Now we calculate the term frequency of the each term in the data-set and then calculate probability of term give genre i.e P( T | G )using conditional probability formula (Note we apply smoothing here i.e. increment term frequency counter by 1 for each term).
+9.  Now we calculate the term frequency of the each term in the data-set and then calculate probability of term give genre i.e P( T | G )using conditional probability formula (Note we apply smoothing here i.e. increment term frequency counter by 1 for each term).
 
 ```java
 	LinkedHashMap<ProbabilityOfTermGivenGenre, Integer> termCounterMap = new LinkedHashMap<ProbabilityOfTermGivenGenre, Integer>();
@@ -496,7 +496,7 @@ String moviesDataSet = "/tmdb_5000_movies.csv";
 			});
 ```
 
-12. Now we store P( T | G) values in a map.
+10. Now we store P( T | G) values in a map.
 
 ```java
 	termCounterMap.forEach((key, value) -> {
