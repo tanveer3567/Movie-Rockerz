@@ -524,7 +524,7 @@ String moviesDataSet = "/tmdb_5000_movies.csv";
 
 3. Then we use porter’s steaming algorithm to get the stem form of each word by iterating over all the words in the array.
 
-``java
+```java
 	for (int i = 0; i < splitList.size(); i++) {
 		if (checkStopWord(splitList.get(i))) {
 			splitList.remove(i);
@@ -566,7 +566,6 @@ String moviesDataSet = "/tmdb_5000_movies.csv";
 			.forEachOrdered(x -> reverseSortedMap.put(x.getKey(), x.getValue()));
 
 ```
-
 ### Classifier Evaluation:
 
 1. After creating document to terms map we now split the dataset into 60% training, 20% development, 20% testing.
@@ -760,6 +759,47 @@ The project provides a search box for input from the user. Once the search butto
 ## Technology stack
 
 Java 1.8, Spring boot 4, Thymleaf, Bootstrap, Apache Maven, Apache OpenNlp, AWS EC2, AWS S3, Spring tool suit 4
+
+## How to use my code:
+
+1. First of all your machine should have following softwares installed in it.\
+
+	a. Java 1.8
+	b. Eclipse or Spring tool suit.
+	c. Apache Maven
+	d. Spring Framework
+
+2. Then import this project into the workspace, then do a Maven update project and  do a Maven clean install.
+
+3. Then run the project as a spring boot application and this will generete a movie_cockerz-1.0.War in target folder of the project.
+
+4. Go to http://localhost:8080 to access the application.
+
+## How to deploy the code on a remote server
+
+1. You should be familiar with AWS EC2 and S3 services offered by amazon.
+
+2. First create a S3 storages and add movie_cockerz-1.0.War file which is generated in target forlder of the project in your loal machine when you run the project as spring boot project.
+
+3. Then upadte the data-set.csv file to S3 storage and then a remote link gets generated
+
+3. When you upload the war file to S3 it will give a remote link to the file.
+
+4. Then create a Unix EC2 instance which comes with Java 1.8 preinstalled and connect to it.
+
+5. Then execute the following comands
+
+	a. wget <war-remote-link>
+	b. wget <data-set.remote-link>
+	c. nohop java movie-rokcerz-1.0.war
+	d. ctrl + z
+	e. bg
+	
+6. Then our deployment will start. You can monitor your deployment by typing "vi nohop.out" command in unix console. 
+
+7. After deploying, type the following in your browser to access the application.
+
+	http://Unix-Machine-name:8080
 
 ## References
 
