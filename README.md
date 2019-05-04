@@ -791,7 +791,7 @@ Java 1.8, Spring boot 4, Thymleaf, Bootstrap, Apache Maven, Apache OpenNlp, AWS 
 
 	- wget <war-remote-link>
 	- wget <data-set.remote-link>
-	- nohop java movie-rokcerz-1.0.war
+	- nohop java -jar movie-rokcerz-1.0.war
 	- ctrl + z
 	- bg
 	
