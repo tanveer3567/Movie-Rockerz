@@ -764,10 +764,10 @@ Java 1.8, Spring boot 4, Thymleaf, Bootstrap, Apache Maven, Apache OpenNlp, AWS 
 
 1. First of all your machine should have following softwares installed in it.\
 
-	a. Java 1.8
-	b. Eclipse or Spring tool suit.
-	c. Apache Maven
-	d. Spring Framework
+	- Java 1.8
+	- Eclipse or Spring tool suit.
+	- Apache Maven
+	- Spring Framework
 
 2. Then import this project into the workspace, then do a Maven update project and  do a Maven clean install.
 
@@ -789,11 +789,11 @@ Java 1.8, Spring boot 4, Thymleaf, Bootstrap, Apache Maven, Apache OpenNlp, AWS 
 
 5. Then execute the following comands
 
-	a. wget <war-remote-link>
-	b. wget <data-set.remote-link>
-	c. nohop java movie-rokcerz-1.0.war
-	d. ctrl + z
-	e. bg
+	- wget <war-remote-link>
+	- wget <data-set.remote-link>
+	- nohop java movie-rokcerz-1.0.war
+	- ctrl + z
+	- bg
 	
 6. Then our deployment will start. You can monitor your deployment by typing "vi nohop.out" command in unix console. 
 
