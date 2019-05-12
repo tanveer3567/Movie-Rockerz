@@ -755,6 +755,25 @@ The project provides a search box for input from the user. Once the search butto
 
 4. Then movies with highest cosine similarity are shown as recommended movies along with the details of the movies which is clicked        earlier.
 
+5. Use of cookies to store moviedId on client's browser i.e. recommendation system tracks the last movie that user clicked and stroes it on browser.
+
+6. When the user opens the website 20 movies will be recommended to user based on movie description of last seen movie.
+
+```java
+	Cookie[] cookies = httpRequest.getCookies();
+		if (!(Objects.nonNull(cookies) && cookies.length > 0)) {
+			Cookie cookie = new Cookie("recommendations", movieId);
+			httpResponse.addCookie(cookie);
+		}else {
+			for(Cookie cookie : cookies) {
+				if(cookie.getName().equalsIgnoreCase("recommendations")) {
+					cookie.setValue(movieId);
+					httpResponse.addCookie(cookie);
+				}
+			}
+		}
+```
+
 
 ## Technology stack
 
