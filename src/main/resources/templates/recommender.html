@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+	xmlns:form="http://form" xmlns:field="http://field">
+<head>
+<meta charset="ISO-8859-1">
+<title>Movie Rockerz</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<style type="text/css">
+h1 {
+	text-align: center;
+}
+
+.highlight {
+	background-color: yellow;
+}
+
+.navcolor {
+	background-color: #513CA3;
+}
+
+.row-centered {
+	text-align: center;
+}
+
+.block-with-text {
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+}
+
+.toolltip {
+	position: relative;
+	display: inline-block;
+}
+
+.toolltip .toolltiptext {
+	visibility: hidden;
+	width: 360px;
+	background-color: gray;
+	color: #fff;
+	text-align: justify;
+	border-radius: 6px;
+	padding: 5px;
+	/* Position the tooltip */
+	position: absolute;
+	z-index: 5;
+	position: absolute;
+}
+
+.toolltip:hover .toolltiptext {
+	visibility: visible;
+}
+</style>
+</head>
+<body class="body">
+	<nav class="navbar navbar-expand-md navcolor navbar-dark sticky-top">
+		<a class="navbar-brand" href="/movierockerz">Movie Rockerz</a>
+		<button class="navbar-toggler navbar-toggler-right" type="button"
+			data-toggle="collapse" data-target="#navb" aria-expanded="true">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div id="navb" class="navbar-collapse collapse hide">
+			<ul class="nav navbar-nav ml-auto">
+				<li class="nav-item"><a class="nav-link" href="/movierockerz"><span
+						class="fas fa-user"></span> Search</a></li>
+				<li class="nav-item"><a class="nav-link" href="/movierockerz/classifier"><span
+						class="fas fa-user"></span> Classifier</a></li>
+			</ul>
+		</div>
+	</nav>
+	<br />
+	<br />
+	<div class="container">
+		<div class="row">
+			<div class="col-md-2"></div>
+			<div class="col-md-8">
+				<form action="/movierockerz">
+					<div class="form-group row">
+						<div class="col-md-10">
+							<input class="form-control" id="ex3" type="text"
+								placeholder="type here" name="search"> <input
+								type="hidden" id="page" name="page" value="1">
+						</div>
+						<div class="input-group-btn">
+							<button class="btn btn-primary mb-2" type="submit">search</button>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="col-md-2">
+				<a href="/movierockerz/tf">Tf values</a> <a href="/movierockerz/idf">Idf
+					values</a> <a href="/movierockerz/vectors">vectors values</a> <br /> <a
+					href="/movierockerz/fullResults">Cosine similarity scores</a>
+			</div>
+		</div>
+		<br /> <br />
+		<div class="row">
+			<h4>
+				<a th:href="${result.getUrl()}" th:text="${result.getTitle()}"></a>
+			</h4>
+		</div>
+		<br />
+		<div class="row">
+			<div class="col-md-6">
+				<h5 style="display: inline">Budget :</h5>
+				<h6 style="display: inline" class="text-dark"
+					th:text="${result.getBudget()}"></h6>
+				<br />
+				<h5 style="display: inline">Revenue :</h5>
+				<h6 style="display: inline" class="text-dark"
+					th:text="${result.getRevenue()}"></h6>
+				<br />
+				<h5 style="display: inline">Runtime :</h5>
+				<h6 style="display: inline" class="text-dark"
+					th:text="${result.getRuntime()}"></h6>
+				<br />
+				<h5 style="display: inline">Release Date :</h5>
+				<h6 style="display: inline" class="text-dark"
+					th:text="${result.getReleaseDate()}"></h6>
+				<br />
+				<h5 style="display: inline">Popularity :</h5>
+				<h6 style="display: inline" class="text-dark"
+					th:text="${result.getPopularity()}"></h6>
+				<br />
+				<h5 style="display: inline">No of votes :</h5>
+				<h6 style="display: inline" class="text-dark"
+					th:text="${result.getNoOfVotes()}"></h6>
+				<br />
+				<h5 style="display: inline">Average votes :</h5>
+				<h6 style="display: inline" class="text-dark"
+					th:text="${result.getAvgVotes()}"></h6>
+			</div>
+			<div class="col-md-6">
+				<h5 style="display: inline">Overview :</h5>
+				<h6 style="display: inline" class="text-dark"
+					th:text="${result.getOverview()}"></h6>
+				<br />
+				<h5 style="display: inline">Genre :</h5>
+				<div style="display: inline" th:each="genre : ${result.getGenres()}">
+					<h6 style="display: inline" class="text-dark" th:text="${genre}"></h6>
+					<h6 style="display: inline" class="text-dark">,</h6>
+				</div>
+				<br />
+				<h5 style="display: inline">Tags :</h5>
+				<div style="display: inline" th:each="tag : ${result.getTags()}">
+					<h6 style="display: inline" class="text-dark" th:text="${tag}"></h6>
+					<h6 style="display: inline" class="text-dark">,</h6>
+				</div>
+			</div>
+		</div>
+		<br /> <br />
+		<div class="row">
+			<h5>Recommendations</h5>
+		</div>
+		<br />
+		<div class="row">
+			<div class="col-md-3" th:each="movie : ${searchResult}">
+				<div class="card border-dark mb-4" style="max-width: 18rem;">
+					<div class="card-header bgcol">
+						<a
+							th:href="@{/movierockerz/movieDetails(movieId=${movie.getKey().getId()})}"
+							th:text="${movie.getKey().getName()}">ncs</a>
+					</div>
+					<div class="card-body text-dark">
+						<p class="card-text wrap-text block-with-text"
+							th:text="${movie.getValue()}" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<br />
+</body>
+</html>

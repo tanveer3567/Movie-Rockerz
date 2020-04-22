@@ -65,20 +65,18 @@ h1 {
 </head>
 <body class="body">
 	<nav class="navbar navbar-expand-md navcolor navbar-dark sticky-top">
-		<a class="navbar-brand" href="#">Movie Rockerz</a>
+		<a class="navbar-brand" href="/movierockerz">Movie Rockerz</a>
 		<button class="navbar-toggler navbar-toggler-right" type="button"
 			data-toggle="collapse" data-target="#navb" aria-expanded="true">
 			<span class="navbar-toggler-icon"></span>
 		</button>
 		<div id="navb" class="navbar-collapse collapse hide">
 			<ul class="nav navbar-nav ml-auto">
+				<li class="nav-item"><a class="nav-link" href="/movierockerz"><span
+						class="fas fa-user"></span> Search</a></li>
 				<li class="nav-item"><a class="nav-link"
 					href="/movierockerz/classifier"><span class="fas fa-user"></span>
 						Classifier</a></li>
-				<li class="nav-item"><a class="nav-link" href="#"><span
-						class="fas fa-user"></span> Sign Up</a></li>
-				<li class="nav-item"><a class="nav-link" href="#"><span
-						class="fas fa-sign-in-alt"></span> Login</a></li>
 			</ul>
 		</div>
 	</nav>
@@ -101,7 +99,11 @@ h1 {
 					</div>
 				</form>
 			</div>
-			<div class="col-md-2"></div>
+			<div class="col-md-2">
+				<a href="/movierockerz/tf">Tf values</a> <a href="/movierockerz/idf">Idf
+					values</a> <a href="/movierockerz/vectors">vectors values</a> <br /> <a
+					href="/movierockerz/fullResults">Cosine similarity scores</a>
+			</div>
 		</div>
 		<br />
 		<div class="row">
@@ -116,22 +118,23 @@ h1 {
 				<div class="col-md-10">
 					<br />
 					<div class="bgcol">
-						<a th:href="${movie.getCustomMap().getUrl()}"
+						<a
+							th:href="@{/movierockerz/movieDetails(movieId=${movie.getCustomMap().getId()})}"
 							th:text="${movie.getCustomMap().getName()}"></a>
-					</div>
-					<div>
-						<em th:text="${movie.getCustomMap().getUrl()}"></em>
 					</div>
 					<div>
 						<p class="card-text text-justify text-dark"
 							th:text="${movie.getOverview()}" />
 					</div>
-					<span style="float: left">Tags:&nbsp;</span>
-					<div style="text-align: right; width: 100%"
-						th:each="tag : ${movie.getCustomMap().getTagList()}">
-						<em style="float: left" th:text="${tag}"></em> <em
-							style="float: left">,&nbsp;</em>
+					<div>
+						<span style="float: left">Tags:&nbsp;</span>
+						<div style="text-align: right; width: 100%"
+							th:each="tag : ${movie.getCustomMap().getTagList()}">
+							<em style="float: left" th:text="${tag}"></em> <em
+								style="float: left">,&nbsp;</em>
+						</div>
 					</div>
+					<br>
 				</div>
 			</div>
 		</div>

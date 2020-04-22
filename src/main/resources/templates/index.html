@@ -6,10 +6,13 @@
 <head>
 <meta charset="ISO-8859-1">
 <title>Movie Rockerz</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <script type="text/javascript">
 	var logfun = function() {
 		console.log("logged");
@@ -19,27 +22,63 @@
 h1 {
 	text-align: center;
 }
+.highlight {
+	background-color: yellow;
+}
 
 .navcolor {
 	background-color: #513CA3;
+}
+
+.row-centered {
+	text-align: center;
+}
+	
+.block-with-text {
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+}
+
+.toolltip {
+	position: relative;
+	display: inline-block;
+}
+
+.toolltip .toolltiptext {
+	visibility: hidden;
+	width: 360px;
+	background-color: gray;
+	color: #fff;
+	text-align: justify;
+	border-radius: 6px;
+	padding: 5px;
+	/* Position the tooltip */
+	position: absolute;
+	z-index: 5;
+	position: absolute;
+}
+
+.toolltip:hover .toolltiptext {
+	visibility: visible;
 }
 </style>
 </head>
 <body>
 	<nav class="navbar navbar-expand-md navcolor navbar-dark sticky-top">
-		<a class="navbar-brand" href="#">Movie Rockerz</a>
+		<a class="navbar-brand" href="/movierockerz">Movie Rockerz</a>
 		<button class="navbar-toggler navbar-toggler-right" type="button"
 			data-toggle="collapse" data-target="#navb" aria-expanded="true">
 			<span class="navbar-toggler-icon"></span>
 		</button>
 		<div id="navb" class="navbar-collapse collapse hide">
 			<ul class="nav navbar-nav ml-auto">
-				<li class="nav-item"><a class="nav-link" href="/movierockerz/classifier"><span
-						class="fas fa-user"></span> Classifier</a></li>
-				<li class="nav-item"><a class="nav-link" href="#"><span
-						class="fas fa-user"></span> Sign Up</a></li>
-				<li class="nav-item"><a class="nav-link" href="#"><span
-						class="fas fa-sign-in-alt"></span> Login</a></li>
+				<li class="nav-item"><a class="nav-link" href="/movierockerz"><span
+						class="fas fa-user"></span> Search</a></li>
+				<li class="nav-item"><a class="nav-link"
+					href="/movierockerz/classifier"><span class="fas fa-user"></span>
+						Classifier</a></li>
 			</ul>
 		</div>
 	</nav>
@@ -53,8 +92,8 @@ h1 {
 					<div class="form-group row">
 						<div class="col-md-10">
 							<input class="form-control" id="ex3" type="text"
-								placeholder="type here" name="search" />
-							<input type="hidden" id="page" name="page" value="1">
+								placeholder="type here" name="search" /> <input type="hidden"
+								id="page" name="page" value="1">
 						</div>
 						<div class="input-group-btn">
 							<button class="btn btn-primary mb-2" type="submit">search</button>
@@ -63,6 +102,26 @@ h1 {
 				</form>
 			</div>
 			<div class=col-md-2></div>
+		</div>
+		<br /> <br />
+		<div class="row">
+			<h5>Recommendations</h5>
+		</div>
+		<br />
+		<div class="row">
+			<div class="col-md-3" th:each="movie : ${searchResult}">
+				<div class="card border-dark mb-4" style="max-width: 18rem;">
+					<div class="card-header bgcol">
+						<a
+							th:href="@{/movierockerz/movieDetails(movieId=${movie.getKey().getId()})}"
+							th:text="${movie.getKey().getName()}">ncs</a>
+					</div>
+					<div class="card-body text-dark">
+						<p class="card-text wrap-text block-with-text"
+							th:text="${movie.getValue()}" />
+					</div>
+				</div>
+			</div>
 		</div>
 		<br />
 	</div>

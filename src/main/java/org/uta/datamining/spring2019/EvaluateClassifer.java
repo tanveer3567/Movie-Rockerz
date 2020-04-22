@@ -233,7 +233,6 @@ public class EvaluateClassifer {
 
 		double fSum = 0;
 		for (Statistic statistic : testList) {
-			//System.out.println(statistic.getMovieId()+";"+statistic.getGenreScore()+";"+statistic.getPrecision()+";"+statistic.getRecall()+";"+statistic.getfMeasure());
 			fSum += statistic.getfMeasure();
 		}
 

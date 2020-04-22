@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -46,6 +47,7 @@ public class SearchAlgorithm {
 	static ArrayList<String> uniqueTermList = new ArrayList<String>();
 	static LinkedHashMap<Integer, String> movieUrlMap = new LinkedHashMap<Integer, String>();
 	static LinkedHashMap<Integer, List<String>> tagsMap = new LinkedHashMap<Integer, List<String>>();
+	static LinkedHashSet<String> queryHashSet = new LinkedHashSet<String>();
 
 	static String[] stopWords = { "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any",
 			"are", "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by",
@@ -61,10 +63,9 @@ public class SearchAlgorithm {
 			"who", "who's", "whom", "why", "why's", "with", "would", "you", "you'd", "you'll", "you're", "you've",
 			"your", "yours", "yourself", "yourselves" };
 
-	
 	public static void preLoad() throws FileNotFoundException {
 
-		String moviesDataSet = "/tmdb_5000_movies.csv";
+		String moviesDataSet = "/src/tmdb_5000_movies.csv";
 		try {
 			String property = System.getProperty("user.dir");
 			FileReader filereader = new FileReader(new File(property + moviesDataSet));
@@ -131,8 +132,54 @@ public class SearchAlgorithm {
 				}
 			});
 		}
+		PorterStemmer porterStemmer = new PorterStemmer();
+		finalResults.forEach((custom, overview) -> {
+			ArrayList<String> terms = documentMap.get(custom.getId());
+			List<String> matchWords = new ArrayList<String>();
+			TreeSet<String> finalMatchWords = new TreeSet<String>();
+			terms.forEach(term -> {
+				if (queryHashSet.contains(term)) {
+					matchWords.add(term);
+				}
+			});
+			List<String> list = tagsMap.get(custom.getId());
+			list.forEach(term -> {
+				if (queryHashSet.contains(term)) {
+					matchWords.add(term);
+				}
+			});
+			String[] split = overview.split(" ");
+			for (int i = 0; i < split.length; i++) {
+				String stem = porterStemmer.stem(split[i]);
+				if (matchWords.contains(stem)) {
+					finalMatchWords.add(split[i]);
+				}
+			}
+			List<String> tagList = custom.getTagList();
+			for (String tag : tagList) {
+				String stem = porterStemmer.stem(tag);
+				if (matchWords.contains(stem)) {
+					finalMatchWords.add(tag);
+				}
+			}
+			custom.setMatchWords(finalMatchWords);
+		});
+		finalResults.forEach((custom, overview) -> {
+			LinkedHashMap<String, Double> tempMap = new LinkedHashMap<String, Double>();
+			LinkedHashMap<Integer, Double> mapper = documentFinalVectorMap.get(custom.getId());
+			mapper.forEach((id, value) -> {
+				TreeSet<String> matchWords = custom.getMatchWords();
+				matchWords.forEach(match -> {
+					if (match.equalsIgnoreCase(uniqueTermList.get(id))) {
+						tempMap.put(match, value);
+					}
+				}); 
+			});
+			custom.setWordsTfIdfMatch(tempMap);
+		});
+
 		String property = System.getProperty("user.dir");
-		PrintWriter wr = new PrintWriter(new File(property + "/output.txt"));
+		PrintWriter wr = new PrintWriter(new File(property + "/src/output.txt"));
 		finalResults.forEach((key, value) -> {
 			wr.write(key.getName() + " : " + key.getScore());
 			wr.write("\n");
@@ -167,7 +214,7 @@ public class SearchAlgorithm {
 
 	private static TreeMap<CustomMap, String> getQuery(String query) throws FileNotFoundException {
 
-		LinkedHashSet<String> queryHashSet = new LinkedHashSet<String>();
+		queryHashSet = new LinkedHashSet<String>();
 		ArrayList<String> queryList = new ArrayList<String>();
 		LinkedHashMap<String, Integer> queryTermFrequencyMap = new LinkedHashMap<String, Integer>();
 		String[] split2 = query.toLowerCase().split(" ");
@@ -234,7 +281,7 @@ public class SearchAlgorithm {
 			}
 			treeMap.put(
 					new CustomMap(entry.getKey(), cosineSimilarity, movieNameMap.get(entry.getKey()),
-							movieUrlMap.get(entry.getKey()), tagsMap.get(entry.getKey())),
+							movieUrlMap.get(entry.getKey()), tagsMap.get(entry.getKey()), queryList),
 					overviewMap.get(entry.getKey()));
 		}
 		return treeMap;
@@ -267,7 +314,7 @@ public class SearchAlgorithm {
 
 	public static void createPrimaryDocumentVectors() throws FileNotFoundException {
 
-		PrintWriter wr2 = new PrintWriter(new File(System.getProperty("user.dir") + "/idf.txt"));
+		PrintWriter wr2 = new PrintWriter(new File(System.getProperty("user.dir") + "/src/idf.txt"));
 		idfMapOfTerms.forEach((term, value) -> {
 			idfList.add(value);
 			wr2.write(term + ": " + value + "\n");
@@ -288,12 +335,12 @@ public class SearchAlgorithm {
 			}
 			documentPrimaryVectorMap.put(document.getKey(), vectorMap);
 		}
-		PrintWriter wr3 = new PrintWriter(new File(System.getProperty("user.dir") + "/prime.txt"));
+		PrintWriter wr3 = new PrintWriter(new File(System.getProperty("user.dir") + "/src/prime.txt"));
 		documentPrimaryVectorMap.forEach((key, value) -> {
-		    String name = movieNameMap.get(key);
+			String name = movieNameMap.get(key);
 			value.forEach((id, score) -> {
-				wr3.write("("+name+", ");
-				wr3.write(uniqueTermList.get(id)+")"+" : "+score+"\n");
+				wr3.write("(" + name + ", ");
+				wr3.write(uniqueTermList.get(id) + ")" + " : " + score + "\n");
 			});
 		});
 		wr3.flush();
@@ -301,7 +348,7 @@ public class SearchAlgorithm {
 	}
 
 	public static void createFinalDocumentVectors() throws FileNotFoundException {
-		
+
 		LinkedHashMap<Integer, LinkedHashMap<Integer, Double>> interMap = new LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>();
 		for (Entry<Integer, LinkedHashMap<Integer, Integer>> entry : documentPrimaryVectorMap.entrySet()) {
 			finalVectorList = new LinkedHashMap<Integer, Double>();
@@ -317,24 +364,24 @@ public class SearchAlgorithm {
 			documentFinalVectorMap.put(entry.getKey(), finalVectorList);
 			interMap.put(entry.getKey(), map);
 		}
-		
-		PrintWriter wr3 = new PrintWriter(new File(System.getProperty("user.dir") + "/Tf.txt"));
+
+		PrintWriter wr3 = new PrintWriter(new File(System.getProperty("user.dir") + "/src/Tf.txt"));
 		interMap.forEach((key, value) -> {
-		    String name = movieNameMap.get(key);
+			String name = movieNameMap.get(key);
 			value.forEach((id, score) -> {
-				wr3.write("("+name+", ");
-				wr3.write(uniqueTermList.get(id)+")"+" : "+score+"\n");
+				wr3.write("(" + name + ", ");
+				wr3.write(uniqueTermList.get(id) + ")" + " : " + score + "\n");
 			});
 		});
 		wr3.flush();
 		wr3.close();
-		
-		PrintWriter wr4 = new PrintWriter(new File(System.getProperty("user.dir") + "/final.txt"));
+
+		PrintWriter wr4 = new PrintWriter(new File(System.getProperty("user.dir") + "/src/final.txt"));
 		documentFinalVectorMap.forEach((key, value) -> {
-		    String name = movieNameMap.get(key);
+			String name = movieNameMap.get(key);
 			value.forEach((id, score) -> {
-				wr4.write("("+name+", ");
-				wr4.write(uniqueTermList.get(id)+")"+" : "+score+"\n");
+				wr4.write("(" + name + ", ");
+				wr4.write(uniqueTermList.get(id) + ")" + " : " + score + "\n");
 			});
 		});
 		wr4.flush();

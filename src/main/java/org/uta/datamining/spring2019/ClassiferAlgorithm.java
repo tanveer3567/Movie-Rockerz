@@ -54,7 +54,7 @@ public class ClassiferAlgorithm {
 
 	public static void preload() {
 
-		String moviesDataSet = "//tmdb_5000_movies.csv";
+		String moviesDataSet = "/src/tmdb_5000_movies.csv";
 		try {
 			String property = System.getProperty("user.dir");
 			FileReader filereader = new FileReader(new File(property + moviesDataSet));
